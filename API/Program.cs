@@ -1,5 +1,7 @@
-using Microsoft.EntityFrameworkCore;
-using Persistence;
+global using Microsoft.EntityFrameworkCore;
+global using Persistence;
+global using Domain;
+global using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
