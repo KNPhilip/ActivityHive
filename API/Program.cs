@@ -5,6 +5,7 @@ global using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using MediatR;
 using Application.Activities;
+using Application.Core;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +24,7 @@ builder.Services.AddCors(Options => {
     });
 });
 builder.Services.AddMediatR(typeof(List.Handler));
+builder.Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
 
 var app = builder.Build();
 
