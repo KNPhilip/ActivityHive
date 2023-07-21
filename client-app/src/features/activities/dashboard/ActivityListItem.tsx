@@ -3,6 +3,7 @@ import { Button, Item, Label } from "semantic-ui-react";
 import { Activity } from "../../../app/models/activity";
 import { useStore } from "../../../app/stores/store";
 import { SyntheticEvent, useState } from "react";
+import { observer } from "mobx-react-lite";
 
 interface Props {
     activity: Activity
@@ -54,4 +55,4 @@ const ActivityListItem = ({activity}: Props) => {
     )
 }
 
-export default ActivityListItem;
+export default observer(ActivityListItem);
