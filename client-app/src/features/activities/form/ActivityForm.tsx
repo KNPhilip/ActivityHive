@@ -1,10 +1,10 @@
-import { ChangeEvent, useState, useEffect } from "react";
-import { Button, Form, Segment } from "semantic-ui-react";
-import { useStore } from "../../../app/stores/store";
-import { observer } from "mobx-react-lite";
-import { useNavigate, useParams } from "react-router-dom";
-import LoadingComponent from "../../../app/layout/LoadingComponent";
-import {v4 as uuid} from "uuid";
+import { ChangeEvent, useState, useEffect } from 'react';
+import { Button, Form, Segment } from 'semantic-ui-react';
+import { useStore } from '../../../app/stores/store';
+import { observer } from 'mobx-react-lite';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import LoadingComponent from '../../../app/layout/LoadingComponent';
+import {v4 as uuid} from 'uuid';
 
 const ActivityForm = () => {
 
@@ -14,13 +14,13 @@ const ActivityForm = () => {
     const navigate = useNavigate();
 
     const [activity, setActivity] = useState({
-        id: "",
-        title: "",
-        category: "",
-        description: "",
-        date: "",
-        city: "",
-        venue: ""
+        id: '',
+        title: '',
+        category: '',
+        description: '',
+        date: '',
+        city: '',
+        venue: ''
     });
 
     useEffect(() => {
@@ -52,7 +52,7 @@ const ActivityForm = () => {
                 <Form.Input placeholder="City" value={activity.city} name="city" onChange={handleInputChange} />
                 <Form.Input placeholder="Venue" value={activity.venue} name="venue" onChange={handleInputChange} />
                 <Button floated="right" positive type="submit" content="Submit" />
-                <Button disabled={loading} floated="right" type="button" content="Cancel" />
+                <Button as={Link} to="/activities" disabled={loading} floated="right" type="button" content="Cancel" />
             </Form>
         </Segment>
     );

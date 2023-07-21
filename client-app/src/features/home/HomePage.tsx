@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
-import { Container } from "semantic-ui-react"
+import { Link } from 'react-router-dom';
+import { Container } from 'semantic-ui-react';
 
 const HomePage = () => {
     return (

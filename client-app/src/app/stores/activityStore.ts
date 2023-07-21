@@ -1,7 +1,7 @@
-import { makeAutoObservable, runInAction } from "mobx";
-import { Activity } from "../models/activity";
-import { v4 as uuid } from "uuid";
-import agent from "../api/agent";
+import { makeAutoObservable, runInAction } from 'mobx';
+import { Activity } from '../models/activity';
+import { v4 as uuid } from 'uuid';
+import agent from '../api/agent';
 
 export default class ActivityStore {
     activityRegistry = new Map<string, Activity>();
@@ -55,7 +55,7 @@ export default class ActivityStore {
     }
 
     private setActivity = (activity: Activity) => {
-        activity.date = activity.date.split("T")[0];
+        activity.date = activity.date.split('T')[0];
         this.activityRegistry.set(activity.id, activity)
     }
 
