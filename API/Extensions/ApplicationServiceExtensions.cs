@@ -1,3 +1,7 @@
+using Application.Activities;
+using Application.Core;
+using MediatR;
+
 namespace API.Extensions
 {
     public static class ApplicationServiceExtensions
