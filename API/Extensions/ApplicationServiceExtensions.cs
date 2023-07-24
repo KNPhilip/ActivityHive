@@ -1,5 +1,7 @@
 using Application.Activities;
 using Application.Core;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using MediatR;
 
 namespace API.Extensions
@@ -20,6 +22,8 @@ namespace API.Extensions
             });
             services.AddMediatR(typeof(List.Handler));
             services.AddAutoMapper(typeof(MappingProfiles).Assembly);
+            services.AddFluentValidationAutoValidation();
+            services.AddValidatorsFromAssemblyContaining<Create>();
 
             return services;
         }
