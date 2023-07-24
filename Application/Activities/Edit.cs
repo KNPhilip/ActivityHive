@@ -40,7 +40,7 @@ namespace Application.Activities
                 
                 _mapper.Map(request.Activity, activity);
                 bool result = await _context.SaveChangesAsync(cancellationToken) > 0;
-                return result is false ? new ServiceResponse<Unit>() { Error = "Failed to update activity." } : ServiceResponse<Unit>.SuccessResponse(Unit.Value);
+                return result ? ServiceResponse<Unit>.SuccessResponse(Unit.Value) : new ServiceResponse<Unit>() { Error = "Failed to update activity." };
             }
         }
     }
