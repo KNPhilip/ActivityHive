@@ -3,6 +3,7 @@ import App from '../layout/App';
 import ActivityDashboard from '../../features/activities/dashboard/ActivityDashboard';
 import ActivityForm from '../../features/activities/form/ActivityForm';
 import ActivityDetails from '../../features/activities/details/ActivityDetails';
+import TestErrors from '../../features/errors/TestError';
 
 export const routes: RouteObject[] = [
     {
@@ -12,7 +13,8 @@ export const routes: RouteObject[] = [
             {path: 'activities', element: <ActivityDashboard />},
             {path: 'activities/:id', element: <ActivityDetails />},
             {path: 'create-activity', element: <ActivityForm key="create" />},
-            {path: 'edit-activity/:id', element: <ActivityForm key="edit" />}
+            {path: 'edit-activity/:id', element: <ActivityForm key="edit" />},
+            {path: 'errors', element: <TestErrors />}
         ]
     }
 ];
