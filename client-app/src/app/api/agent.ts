@@ -15,7 +15,7 @@ axios.interceptors.response.use(async response => {
     await sleep(1000);
     return response;
 }, (error: AxiosError) => {
-    const {data, status, config} = error.response as AxiosResponse;
+    const {data, status} = error.response as AxiosResponse;
     switch(status) {
         case 400:
             if (data.errors) {

@@ -1,4 +1,4 @@
-import {Button, Header, Segment} from "semantic-ui-react";
+import { Button, Header, Segment } from "semantic-ui-react";
 import axios from 'axios';
 import { useState } from "react";
 import ValidationError from "./ValidationError";
@@ -8,7 +8,7 @@ const TestErrors = () => {
     const [errors, setErrors] = useState(null);
 
     function handleNotFound() {
-        axios.get(baseUrl + 'error/not-found').catch(err => console.log(err.response));
+        axios.get('http://httpstat.us/404').catch(err => console.log(err.response));
     }
 
     function handleBadRequest() {
@@ -20,7 +20,7 @@ const TestErrors = () => {
     }
 
     function handleUnauthorised() {
-        axios.get(baseUrl + 'error/unauthorised').catch(err => console.log(err.response));
+        axios.get('http://httpstat.us/401').catch(err => console.log(err.response));
     }
 
     function handleBadGuid() {
