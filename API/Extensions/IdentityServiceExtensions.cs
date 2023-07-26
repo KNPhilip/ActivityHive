@@ -1,3 +1,5 @@
+using API.Services.AuthService;
+
 namespace API.Extensions
 {
     public static class IdentityServiceExtensions
@@ -11,6 +13,7 @@ namespace API.Extensions
             .AddEntityFrameworkStores<DataContext>();
 
             services.AddAuthentication();
+            services.AddScoped<IAuthService, AuthService>();
 
             return services;
         }
