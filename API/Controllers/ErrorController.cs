@@ -2,12 +2,6 @@ namespace API.Controllers
 {
     public class ErrorController : ControllerTemplate
     {
-        [HttpGet("not-found")]
-        public ActionResult GetNotFound()
-        {
-            return NotFound();
-        }
-
         [HttpGet("bad-request")]
         public ActionResult GetBadRequest()
         {
@@ -18,12 +12,6 @@ namespace API.Controllers
         public ActionResult GetServerError()
         {
             throw new Exception("This is a server error");
-        }
-
-        [HttpGet("unauthorised")]
-        public ActionResult GetUnauthorised()
-        {
-            return Unauthorized();
         }
     }
 }

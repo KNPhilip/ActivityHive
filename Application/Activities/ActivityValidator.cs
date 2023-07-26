@@ -7,12 +7,12 @@ namespace Application.Activities
     {
         public ActivityValidator()
         {
-            RuleFor(a => a.Title).NotEmpty();
-            RuleFor(a => a.Description).NotEmpty();
-            RuleFor(a => a.Date).NotEmpty();
-            RuleFor(a => a.Category).NotEmpty();
-            RuleFor(a => a.City).NotEmpty();
-            RuleFor(a => a.Venue).NotEmpty();
+            RuleFor(a => a.Title).NotEmpty().WithMessage("The title field is required.");
+            RuleFor(a => a.Description).NotEmpty().WithMessage("The description field is required.");
+            RuleFor(a => a.Date).NotEmpty().WithMessage("The date field is required.");
+            RuleFor(a => a.Category).NotEmpty().WithMessage("The category field is required.");
+            RuleFor(a => a.City).NotEmpty().WithMessage("The city field is required.");
+            RuleFor(a => a.Venue).NotEmpty().WithMessage("The venue field is required.");
         }
     }
 }
