@@ -1,5 +1,6 @@
 using API.Dtos;
 using API.Services.AuthService;
+using Application.Core;
 using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
@@ -15,10 +16,17 @@ namespace API.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<UserDto>> Login(LoginDto request)
+        public async Task<ActionResult<ServiceResponse<UserDto>>> Login(LoginDto request)
         {
-            var result = await _authService.Login(request);
-            return result is null ? Unauthorized() : Ok(result);
+            var response = await _authService.Login(request);
+            return response.Success ? Ok(response.Data) : Unauthorized(response!.Error ?? "You are not authorized.");
+        }
+
+        [HttpPost("register")]
+        public async Task<ActionResult<ServiceResponse<UserDto>>> Register(RegisterDto request)
+        {
+            var response = await _authService.Register(request);
+            return response.Success ? Ok(response.Data) : BadRequest(response!.Error);
         }
     }
 }
