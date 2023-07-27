@@ -6,6 +6,6 @@ namespace Application.Core
         public T? Data { get; set; }
         public string Error { get; set; } = "Something went wrong..";
 
-        public static ServiceResponse<T> SuccessResponse(T Data) => new() { Success = true, Data = Data };
+        public static ServiceResponse<T> SuccessResponse(T Data) => new() { Success = true, Data = Data, Error = string.Empty };
     }
 }
