@@ -12,11 +12,13 @@ namespace API.Services.AuthService
     {
         private readonly UserManager<User> _userManager;
         private readonly IConfiguration _config;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public AuthService(UserManager<User> userManager, IConfiguration config)
+        public AuthService(UserManager<User> userManager, IConfiguration config, IHttpContextAccessor httpContextAccessor)
         {
             _userManager = userManager;
             _config = config;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public string CreateJWT(User user)
@@ -58,19 +60,13 @@ namespace API.Services.AuthService
         public async Task<ServiceResponse<UserDto?>> Login(LoginDto request)
         {
             User? user = await _userManager.FindByEmailAsync(request.Email);
-            if (user is null) return new ServiceResponse<UserDto?> { Error = "Incorrect username or password." };
+            if (user is null) 
+                return new ServiceResponse<UserDto?> { Error = "Incorrect username or password." };
 
             bool result = await _userManager.CheckPasswordAsync(user, request.Password);
             if (result)
             {
-                UserDto returningUser = new()
-                {
-                    DisplayName = user.DisplayName,
-                    Image = null,
-                    Token = CreateJWT(user),
-                    Username = user.UserName
-                };
-
+                UserDto returningUser = CreateUserObject(user);
                 return ServiceResponse<UserDto?>.SuccessResponse(returningUser);
             }
             return new ServiceResponse<UserDto?> { Error = "Incorrect username or password." };
@@ -95,18 +91,32 @@ namespace API.Services.AuthService
 
             if (result.Succeeded)
             {
-                UserDto returningUser = new()
-                {
-                    DisplayName = user.DisplayName,
-                    Image = null,
-                    Token = CreateJWT(user),
-                    Username = user.UserName
-                };
-
+                UserDto returningUser = CreateUserObject(user);
                 ServiceResponse<UserDto>.SuccessResponse(returningUser);
             }
 
             return new ServiceResponse<UserDto?> { Error = "Please make a stronger password." };
+        }
+
+        public async Task<ServiceResponse<UserDto?>> GetCurrentUser()
+        {
+            User? user = await _userManager.FindByEmailAsync(_httpContextAccessor.HttpContext!.User.FindFirstValue(ClaimTypes.Email)!);
+            var userDto = CreateUserObject(user!);
+            if (userDto is null)
+                return new ServiceResponse<UserDto?> { Error = "User not found." };
+            else
+                return ServiceResponse<UserDto?>.SuccessResponse(userDto);
+        }
+
+        private UserDto CreateUserObject(User user)
+        {
+            return new()
+            {
+                DisplayName = user.DisplayName,
+                Image = null,
+                Token = CreateJWT(user),
+                Username = user.UserName
+            };
         }
     }
 }
