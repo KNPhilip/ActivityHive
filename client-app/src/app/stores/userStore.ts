@@ -28,6 +28,19 @@ export default class UserStore {
         }
     }
 
+    register = async (creds: UserFormValues) => {
+        try {
+            const user = await agent.Auth.register(creds);
+            store.commonStore.setToken(user.token);
+            runInAction(() => this.user = user);
+            router.navigate('/activities');
+            store.modalStore.closeModal();
+        }
+        catch(error) {
+            throw error;
+        }
+    }
+
     logout = () => {
         store.commonStore.setToken(null);
         this.user = null;

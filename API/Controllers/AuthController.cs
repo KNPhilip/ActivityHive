@@ -26,7 +26,13 @@ namespace API.Controllers
         public async Task<ActionResult<ServiceResponse<UserDto>>> Register(RegisterDto request)
         {
             var response = await _authService.Register(request);
-            return response.Success ? Ok(response.Data) : BadRequest(response.Error);
+            if (response.Success)
+                return Ok(response.Data);
+            else 
+            {
+                ModelState.AddModelError("user", "Email or username already taken.");
+                return ValidationProblem();
+            }
         }
 
         [HttpGet, Authorize]

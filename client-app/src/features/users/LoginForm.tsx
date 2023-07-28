@@ -9,7 +9,7 @@ const LoginForm = () => {
 
     return (
         <Formik
-            initialValues={{email: '', password: '', error: null}}
+            initialValues={{ email: '', password: '', error: null }}
             onSubmit={(values, {setErrors}) => userStore.login(values).catch(error =>
                 setErrors({error: 'Incorrect email or password.'}))}
         >
