@@ -3,9 +3,10 @@ import './homePage.css';
 import { Container, Header, Segment, Image, Button } from 'semantic-ui-react';
 import { useStore } from '../../app/stores/store';
 import { observer } from 'mobx-react-lite';
+import LoginForm from '../users/LoginForm';
 
 const HomePage = () => {
-    const { userStore } = useStore();
+    const { userStore, modalStore } = useStore();
 
     return (
         <Segment inverted textAlign="center" vertical className="masthead">
@@ -21,9 +22,14 @@ const HomePage = () => {
                         </Button>
                     </>
                 ) : (
-                    <Button as={Link} to="/login" size="huge" inverted>
-                        Login!
-                    </Button>
+                    <>
+                        <Button onClick={() => modalStore.openModal(<LoginForm />)} size="huge" inverted>
+                            Login
+                        </Button>
+                        <Button onClick={() => modalStore.openModal(<h1>Register</h1>)} size="huge" inverted>
+                            Register
+                        </Button>
+                    </>
                 )}
             </Container>
         </Segment>
