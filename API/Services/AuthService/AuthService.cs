@@ -61,7 +61,7 @@ namespace API.Services.AuthService
         {
             User? user = await _userManager.FindByEmailAsync(request.Email);
             if (user is null) 
-                return new ServiceResponse<UserDto?> { Error = "Incorrect username or password." };
+                return new ServiceResponse<UserDto?> { Error = "Incorrect email or password." };
 
             bool result = await _userManager.CheckPasswordAsync(user, request.Password);
             if (result)
@@ -69,7 +69,7 @@ namespace API.Services.AuthService
                 UserDto returningUser = CreateUserObject(user);
                 return ServiceResponse<UserDto?>.SuccessResponse(returningUser);
             }
-            return new ServiceResponse<UserDto?> { Error = "Incorrect username or password." };
+            return new ServiceResponse<UserDto?> { Error = "Incorrect email or password." };
         }
 
         public async Task<ServiceResponse<UserDto?>> Register(RegisterDto request)

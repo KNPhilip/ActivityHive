@@ -7,6 +7,7 @@ import TestErrors from '../../features/errors/TestError';
 import NotFound from '../../features/errors/NotFound';
 import ServerError from '../../features/errors/ServerError';
 import PageNotFound from '../../features/errors/PageNotFound';
+import LoginForm from '../../features/users/LoginForm';
 
 export const routes: RouteObject[] = [
     {
