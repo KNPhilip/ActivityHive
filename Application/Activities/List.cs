@@ -1,10 +1,10 @@
 using Application.Activities.Dtos;
 using Application.Core;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Domain;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
 using Persistence;
 
 namespace Application.Activities
@@ -29,14 +29,11 @@ namespace Application.Activities
 
             public async Task<ServiceResponse<List<ActivityDto>>> Handle(Query request, CancellationToken cancellationToken)
             {
-                List<Activity> activities = await _context.Activities
-                    .Include(a => a.Attendees)
-                    .ThenInclude(u => u.User)
+                List<ActivityDto> activities = await _context.Activities
+                    .ProjectTo<ActivityDto>(_mapper.ConfigurationProvider)
                     .ToListAsync(cancellationToken);
 
-                List<ActivityDto> response = _mapper.Map<List<ActivityDto>>(activities);
-
-                return ServiceResponse<List<ActivityDto>>.SuccessResponse(response);
+                return ServiceResponse<List<ActivityDto>>.SuccessResponse(activities);
             }
         }
     }
