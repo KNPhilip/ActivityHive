@@ -1,5 +1,7 @@
 using System.Text;
 using API.Services.AuthService;
+using Infrastructure.Security;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 
 namespace API.Extensions
@@ -25,6 +27,12 @@ namespace API.Extensions
                 };
             });
 
+            services.AddAuthorization(options => {
+                options.AddPolicy("IsActivityHost", policy => {
+                    policy.Requirements.Add(new IsHostRequirement());
+                });
+            });
+            services.AddTransient<IAuthorizationHandler, IsHostRequirementHandler>();
             services.AddScoped<IAuthService, AuthService>();
 
             return services;
