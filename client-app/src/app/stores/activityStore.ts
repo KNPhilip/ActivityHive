@@ -5,6 +5,7 @@ import agent from '../api/agent';
 import { format } from 'date-fns';
 import { store } from './store';
 import { Profile } from '../models/profile';
+import { error } from 'console';
 
 export default class ActivityStore {
     activityRegistry = new Map<string, Activity>();
@@ -161,4 +162,19 @@ export default class ActivityStore {
             runInAction(() => this.loading = false);
         }
     }
+
+    cancelActivityToggle = async () => {
+        this.loading = true;
+        try {
+            await agent.Activities.attend(this.selectedActivity!.id);
+            runInAction(() => {
+                this.selectedActivity!.isCancelled = !this.selectedActivity!.isCancelled;
+                this.activityRegistry.set(this.selectedActivity!.id, this.selectedActivity!);
+            })
+        } catch (error) {
+            console.log(error);
+        } finally {
+            runInAction(() => this.loading = false)
+        }
+    } 
 }
