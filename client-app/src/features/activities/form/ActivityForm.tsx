@@ -17,7 +17,7 @@ import { ActivityFormValues } from '../../../app/models/activity';
 const ActivityForm = () => {
 
     const { activityStore } = useStore();
-    const { createActivity, updateActivity, loading, loadActivity, loadingInitial } = activityStore;
+    const { createActivity, updateActivity, loadActivity, loadingInitial } = activityStore;
     const { id } = useParams();
     const navigate = useNavigate();
 
