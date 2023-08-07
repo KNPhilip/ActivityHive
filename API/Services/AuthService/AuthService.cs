@@ -44,17 +44,6 @@ namespace API.Services.AuthService
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
             return tokenHandler.WriteToken(token);
-
-            /* Another option for writing tokens
-            
-            JwtSecurityToken token = new(
-                claims: claims,
-                expires: DateTime.Now.AddDays(7),
-                signingCredentials: creds
-            );
-
-            string jwt = new JwtSecurityTokenHandler().WriteToken(token);
-            return jwt; */
         }
 
         public async Task<ServiceResponse<UserDto?>> Login(LoginDto request)
@@ -100,7 +89,9 @@ namespace API.Services.AuthService
 
         public async Task<ServiceResponse<UserDto?>> GetCurrentUser()
         {
-            User? user = await _userManager.FindByEmailAsync(_httpContextAccessor.HttpContext!.User.FindFirstValue(ClaimTypes.Email)!);
+            User? user = await _userManager.Users
+                .Include(u => u.Photos)
+                .FirstOrDefaultAsync(x => x.Email == _httpContextAccessor.HttpContext!.User.FindFirstValue(ClaimTypes.Email));
             var userDto = CreateUserObject(user!);
             if (userDto is null)
                 return new ServiceResponse<UserDto?> { Error = "User not found." };
@@ -113,7 +104,7 @@ namespace API.Services.AuthService
             return new()
             {
                 DisplayName = user.DisplayName,
-                Image = null,
+                Image = user.Photos?.FirstOrDefault(x => x.IsMain)?.Url,
                 Token = CreateJWT(user),
                 Username = user.UserName
             };
