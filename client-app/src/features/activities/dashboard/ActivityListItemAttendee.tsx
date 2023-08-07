@@ -17,7 +17,7 @@ const ActivityListItemAttendee = ({attendees}: Props) => {
                     key={attendee.username}
                     trigger={
                         <List.Item key={attendee.username} as={Link} to={`/profiles/${attendee.username}`}>
-                            <Image size="mini" circular src={attendee.image || "/assets/user/png"} />
+                            <Image size="mini" circular src={attendee.image || "/assets/user.png"} />
                         </List.Item>
                     }
                 >

@@ -74,7 +74,7 @@ const Activities = {
 }
 
 const Profiles = {
-    get: (username: string) => requests.get<Profile>(`/profiles/${username}`)
+    get: (username: string) => requests.get<Profile>(`/profile/${username}`)
 }
 
 const Auth = {
