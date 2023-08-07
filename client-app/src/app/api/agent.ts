@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import router from '../router/Routes';
 import { store } from '../stores/store';
 import { User, UserFormValues } from '../models/user';
+import { Profile } from '../models/profile';
 
 const sleep = (delay: number) => {
     return new Promise((resolve) => {
@@ -72,6 +73,10 @@ const Activities = {
     attend: (id: string) => requests.post<void>(`/activities/${id}/attend`, {})
 }
 
+const Profiles = {
+    get: (username: string) => requests.get<Profile>(`/profiles/${username}`)
+}
+
 const Auth = {
     current: () => requests.get<User>('/auth'),
     login: (user: UserFormValues) => requests.post<User>('auth/login', user),
@@ -80,6 +85,7 @@ const Auth = {
 
 const agent = {
     Activities,
+    Profiles,
     Auth
 }
 
