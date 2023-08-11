@@ -3,13 +3,18 @@ import PhotoWidgetDropzone from "./PhotoWidgetDropzone";
 import { useEffect, useState } from "react";
 import PhotoWidgetCropper from "./PhotoWidgetCropper";
 
-const PhotoUploadWidget = () => {
+interface Props {
+    loading: boolean;
+    uploadPhoto: (file: Blob) => void;
+}
+
+const PhotoUploadWidget = ({loading, uploadPhoto}: Props) => {
     const [files, setFiles] = useState<any>([]);
     const [cropper, setCropper] = useState<Cropper>();
 
     function onCrop() {
         if (cropper) {
-            cropper.getCroppedCanvas().toBlob(blob => console.log(blob));
+            cropper.getCroppedCanvas().toBlob(blob => uploadPhoto(blob!));
         }
     }
 
@@ -39,8 +44,8 @@ const PhotoUploadWidget = () => {
                     <>
                         <div className="img-preview" style={{minHeight: 200, overflow: 'hidden'}} />
                         <ButtonGroup widths={2}>
-                            <Button onClick={onCrop} positive icon='check' />
-                            <Button onClick={() => setFiles([])} icon='close' />
+                            <Button loading={loading} onClick={onCrop} positive icon='check' />
+                            <Button disabled={loading} onClick={() => setFiles([])} icon='close' />
                         </ButtonGroup>
                     </>
                 }
