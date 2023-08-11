@@ -78,12 +78,12 @@ const Profiles = {
     uploadPhoto: (file: Blob) => {
         let formData = new FormData();
         formData.append('File', file)
-        return axios.post<Photo>('photos', formData, {
+        return axios.post<Photo>('photo', formData, {
             headers: {'Content-Type': 'multipart/form-data'}
         })
     },
-    setMainPhoto: (id: string) => requests.post(`/photos/${id}/setMain`, {}),
-    deletePhoto: (id: string) => requests.del(`/photos/${id}`)
+    setMainPhoto: (id: string) => requests.post(`/photo/${id}/setMain`, {}),
+    deletePhoto: (id: string) => requests.del(`/photo/${id}`)
 }
 
 const Auth = {

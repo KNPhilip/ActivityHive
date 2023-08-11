@@ -10,12 +10,12 @@ namespace Application.Photos
 {
     public class Add
     {
-        public class Command : IRequest<ServiceResponse<Photo>>
+        public class Command : IRequest<ServiceResponse<Photo>?>
         {
             public IFormFile? File { get; set; }
         }
 
-        public class Handler : IRequestHandler<Command, ServiceResponse<Photo>>
+        public class Handler : IRequestHandler<Command, ServiceResponse<Photo>?>
         {
             private readonly DataContext _context;
             private readonly IPhotoAccessor _photoAccessor;
