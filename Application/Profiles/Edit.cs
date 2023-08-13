@@ -43,6 +43,8 @@ namespace Application.Profiles
                 user.Bio = request.Bio ?? user.Bio;
                 user.DisplayName = request.DisplayName ?? user.DisplayName;
 
+                _context.Entry(user).State = EntityState.Modified;
+
                 bool success = await _context.SaveChangesAsync(CancellationToken.None) > 0;
 
                 return success ? ServiceResponse<Unit>.SuccessResponse(Unit.Value)
