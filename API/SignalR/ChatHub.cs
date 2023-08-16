@@ -16,7 +16,8 @@ namespace API.SignalR
 
         public async Task SendComment(Create.Command command)
         {
-            ServiceResponse<CommentDto> comment = await _mediator.Send(command);
+            var response = await _mediator.Send(command);
+            var comment = response!.Data;
 
             await Clients.Group(command.ActivityId.ToString())
                 .SendAsync("ReceiveComment", comment);
@@ -27,8 +28,8 @@ namespace API.SignalR
             HttpContext _context = Context.GetHttpContext()!;
             var activityId = _context!.Request.Query["activityId"];
             await Groups.AddToGroupAsync(Context.ConnectionId, activityId!);
-            var result = await _mediator.Send(new List.Query{ActivityId = Guid.Parse(activityId)});
-            await Clients.Caller.SendAsync("LoadComments", result);
+            var result = await _mediator.Send(new List.Query{ActivityId = Guid.Parse(activityId!)});
+            await Clients.Caller.SendAsync("LoadComments", result!.Data);
         }
     }
 }
