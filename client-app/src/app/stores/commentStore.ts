@@ -14,7 +14,7 @@ export default class CommentStore {
     createHubConnection = (activityId: string) => {
         if (store.activityStore.selectedActivity) {
             this.hubConnection = new HubConnectionBuilder()
-                .withUrl(`http://localhost:5000/chat?activityId=${activityId}`, {
+                .withUrl('http://localhost:5000/chat' + '?activityId=' + activityId, {
                     accessTokenFactory: () => store.userStore.user?.token!
                 })
                 .withAutomaticReconnect()
@@ -25,12 +25,18 @@ export default class CommentStore {
 
             this.hubConnection.on('LoadComments', (comments: ChatComment[]) => {
                 runInAction(() => {
-                    this.comments = comments
+                    comments.forEach(comment => {
+                        comment.createdAt = new Date(comment.createdAt);
+                    });
+                    this.comments = comments;
                 });
             });
 
             this.hubConnection.on('ReceiveComment', (comment: ChatComment) => {
-                runInAction(() => this.comments.push(comment));
+                runInAction(() => {
+                    comment.createdAt = new Date(comment.createdAt);
+                    this.comments.unshift(comment);
+                })
             })
         }
     }

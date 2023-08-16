@@ -1,11 +1,9 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { Activity, ActivityFormValues } from '../models/activity';
-import { v4 as uuid } from 'uuid';
 import agent from '../api/agent';
 import { format } from 'date-fns';
 import { store } from './store';
 import { Profile } from '../models/profile';
-import { error } from 'console';
 
 export default class ActivityStore {
     activityRegistry = new Map<string, Activity>();
