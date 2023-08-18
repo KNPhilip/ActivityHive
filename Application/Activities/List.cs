@@ -1,8 +1,8 @@
 using Application.Activities.Dtos;
 using Application.Core;
+using Application.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using Domain;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
@@ -20,17 +20,20 @@ namespace Application.Activities
         {
             private readonly DataContext _context;
             private readonly IMapper _mapper;
+            private readonly IUserAccessor _userAccessor;
 
-            public Handler(DataContext context, IMapper mapper)
+            public Handler(DataContext context, IMapper mapper, IUserAccessor userAccessor)
             {
                 _mapper = mapper;
+                _userAccessor = userAccessor;
                 _context = context;
             }
 
             public async Task<ServiceResponse<List<ActivityDto>>> Handle(Query request, CancellationToken cancellationToken)
             {
                 List<ActivityDto> activities = await _context.Activities
-                    .ProjectTo<ActivityDto>(_mapper.ConfigurationProvider)
+                    .ProjectTo<ActivityDto>(_mapper.ConfigurationProvider, 
+                        new {currentUsername = _userAccessor.GetUsername()})
                     .ToListAsync(cancellationToken);
 
                 return ServiceResponse<List<ActivityDto>>.SuccessResponse(activities);
