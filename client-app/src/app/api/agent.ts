@@ -85,7 +85,9 @@ const Profiles = {
     setMainPhoto: (id: string) => requests.post(`/photo/${id}/setMain`, {}),
     deletePhoto: (id: string) => requests.del(`/photo/${id}`),
     updateProfile: (profile: Partial<Profile>) => requests.put(`/profile`, profile),
-    updateFollowing: (username: string) => requests.post(`/follow/${username}`, {})
+    updateFollowing: (username: string) => requests.post(`/follow/${username}`, {}),
+    listFollowings: (username: string, predicate: string) =>
+        requests.get<Profile[]>(`/follow/${username}?predicate=${predicate}`)
 }
 
 const Auth = {
