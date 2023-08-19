@@ -1,3 +1,4 @@
+using API.Extensions;
 using Application.Core;
 using MediatR;
 
@@ -14,10 +15,24 @@ namespace API.Controllers
 
         protected ActionResult HandleResult<T>(ServiceResponse<T> response)
         {
-            if (response is null) return NotFound();
+            return response.Success
+                ? response.Data is null
+                    ? NotFound() 
+                    : Ok(response.Data) 
+                : BadRequest(response.Error);
+        }
+
+        protected ActionResult HandlePagedResult<T>(ServiceResponse<PagedList<T>> response)
+        {
             if (response.Success)
-                return response.Data is null ? NotFound() : Ok(response.Data);
-            return BadRequest(response.Error);
+            {
+                if (response.Data is null) return NotFound();
+
+                Response.AddPaginationHeader(response.Data.CurrentPage, response.Data.PageSize,
+                    response.Data.TotalCount, response.Data.TotalPages);
+                return Ok(response.Data);
+            }
+            else return BadRequest(response.Error);
         }
     }
 }
