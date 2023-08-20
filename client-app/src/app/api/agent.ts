@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 import router from '../router/Routes';
 import { store } from '../stores/store';
 import { User, UserFormValues } from '../models/user';
-import { Photo, Profile } from '../models/profile';
+import { Photo, Profile, UserActivity } from '../models/profile';
 import { PaginatedResult } from '../models/pagination';
 
 const sleep = (delay: number) => {
@@ -22,7 +22,7 @@ axios.interceptors.request.use(config => {
 axios.defaults.baseURL = 'http://localhost:5000/api';
 axios.interceptors.response.use(async response => {
     const pagination = response.headers['pagination'];
-    // await sleep(1000);
+    await sleep(500);
     if (pagination) {
         response.data = new PaginatedResult(response.data, JSON.parse(pagination))
         return response as AxiosResponse<PaginatedResult<any>>
@@ -94,7 +94,9 @@ const Profiles = {
     updateProfile: (profile: Partial<Profile>) => requests.put(`/profile`, profile),
     updateFollowing: (username: string) => requests.post(`/follow/${username}`, {}),
     listFollowings: (username: string, predicate: string) =>
-        requests.get<Profile[]>(`/follow/${username}?predicate=${predicate}`)
+        requests.get<Profile[]>(`/follow/${username}?predicate=${predicate}`),
+    listActivities: (username: string, predicate: string) =>
+        requests.get<UserActivity[]>(`/profile/${username}/activities?predicate=${predicate}`)
 }
 
 const Auth = {

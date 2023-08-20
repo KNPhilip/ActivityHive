@@ -1,5 +1,4 @@
 using Application.Activities;
-using Application.Core;
 using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
@@ -7,7 +6,7 @@ namespace API.Controllers
     public class ActivitiesController : ControllerTemplate
     {
         [HttpGet]
-        public async Task<IActionResult> GetActivities([FromQuery]PagingParams request)
+        public async Task<IActionResult> GetActivities([FromQuery] ActivityParams request)
         {
             return HandlePagedResult(await Mediator.Send(new List.Query{Params = request}));
         }
