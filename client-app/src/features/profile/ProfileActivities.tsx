@@ -1,8 +1,7 @@
 import { observer } from "mobx-react-lite";
 import { Card, Grid, Header, Tab, TabProps, Image } from "semantic-ui-react";
 import { useStore } from "../../app/stores/store";
-import { useEffect } from "react";
-import { SyntheticEvent } from "react-toastify/dist/utils";
+import { SyntheticEvent, useEffect } from "react";
 import { UserActivity } from "../../app/models/profile";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
