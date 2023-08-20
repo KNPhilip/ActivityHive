@@ -19,10 +19,10 @@ axios.interceptors.request.use(config => {
     return config;
 })
 
-axios.defaults.baseURL = 'http://localhost:5000/api';
+axios.defaults.baseURL = process.env.REACT_APP_API_URL;
 axios.interceptors.response.use(async response => {
     const pagination = response.headers['pagination'];
-    await sleep(500);
+    if (process.env.NODE_ENV === 'development') await sleep(500);
     if (pagination) {
         response.data = new PaginatedResult(response.data, JSON.parse(pagination))
         return response as AxiosResponse<PaginatedResult<any>>
