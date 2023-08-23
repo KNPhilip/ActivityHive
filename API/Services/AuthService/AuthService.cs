@@ -30,7 +30,7 @@ namespace API.Services.AuthService
                 new Claim(ClaimTypes.Name, user.UserName!)
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["AppSettings:Token"]!));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["TokenKey"]!));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
 
             SecurityTokenDescriptor tokenDescriptor = new()
