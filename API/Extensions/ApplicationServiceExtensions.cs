@@ -42,9 +42,8 @@ namespace API.Extensions
                     var pgHost = pgHostPort.Split(":")[0];
                     var pgPort = pgHostPort.Split(":")[1];
 
-                    //var updatedHost = pgHost.Replace(“flycast”, “internal”);
-                    connStr = $"Server={pgHost};Port={pgPort};User Id={pgUser};Password={pgPass};Database={pgDb};";
-
+                    var updatedHost = pgHost.Replace("flycast", "internal");
+                    connStr = $"Server={updatedHost};Port={pgPort};User Id={pgUser};Password={pgPass};Database={pgDb};";
                 }
 
                 // Whether the connection string came from the local development configuration file
