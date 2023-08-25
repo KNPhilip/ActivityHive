@@ -121,6 +121,7 @@ namespace Persistence
                     },
                     new Activity
                     {
+<<<<<<< Updated upstream
                         Title = "Future Activity 3",
                         Date = DateTime.UtcNow.AddMonths(3),
                         Description = "Activity 3 months in future",
@@ -143,6 +144,8 @@ namespace Persistence
                     },
                     new Activity
                     {
+=======
+>>>>>>> Stashed changes
                         Title = "Future Activity 4",
                         Date = DateTime.UtcNow.AddMonths(4),
                         Description = "Activity 4 months in future",
@@ -179,6 +182,7 @@ namespace Persistence
                                 IsHost = false                            
                             },
                         }
+<<<<<<< Updated upstream
                     },
                     new Activity
                     {
@@ -245,6 +249,8 @@ namespace Persistence
                                 IsHost = false                            
                             },
                         }
+=======
+>>>>>>> Stashed changes
                     }
                 };
                 await context.Activities.AddRangeAsync(activities);
