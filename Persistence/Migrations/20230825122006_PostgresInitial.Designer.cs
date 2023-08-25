@@ -12,7 +12,7 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230823150723_PostgresInitial")]
+    [Migration("20230825122006_PostgresInitial")]
     partial class PostgresInitial
     {
         /// <inheritdoc />
