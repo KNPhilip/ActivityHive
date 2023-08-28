@@ -61,7 +61,9 @@ const HomePage = () => {
               inverted
               color="facebook"
               content="Continue with Facebook"
+              loading={userStore.fbLoading}
               onSuccess={(response: any) => {
+                // userStore.facebookLogin(response.accessToken);
                 console.log("Login success!", response);
               }}
               onFail={(response: any) => {
