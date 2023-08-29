@@ -63,8 +63,7 @@ const HomePage = () => {
               content="Continue with Facebook"
               loading={userStore.fbLoading}
               onSuccess={(response: any) => {
-                // userStore.facebookLogin(response.accessToken);
-                console.log("Login success!", response);
+                userStore.facebookLogin(response.accessToken);
               }}
               onFail={(response: any) => {
                 console.log("Login failed..", response);
