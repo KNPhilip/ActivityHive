@@ -72,6 +72,7 @@ export default class UserStore {
         this.user = user;
         this.fbLoading = false;
       });
+      router.navigate("/activities");
     } catch (error) {
       console.log(error);
       runInAction(() => {
