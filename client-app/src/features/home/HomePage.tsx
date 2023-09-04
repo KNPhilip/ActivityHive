@@ -12,7 +12,10 @@ import { useStore } from "../../app/stores/store";
 import { observer } from "mobx-react-lite";
 import LoginForm from "../users/LoginForm";
 import RegisterForm from "../users/RegisterForm";
-import FacebookLogin from "@greatsumini/react-facebook-login";
+import FacebookLogin, {
+  FailResponse,
+  SuccessResponse,
+} from "@greatsumini/react-facebook-login";
 
 const HomePage = () => {
   const { userStore, modalStore } = useStore();
@@ -62,10 +65,10 @@ const HomePage = () => {
               color="facebook"
               content="Continue with Facebook"
               loading={userStore.fbLoading}
-              onSuccess={(response: any) => {
+              onSuccess={(response: SuccessResponse) => {
                 userStore.facebookLogin(response.accessToken);
               }}
-              onFail={(response: any) => {
+              onFail={(response: FailResponse) => {
                 console.log("Login failed..", response);
               }}
             />
