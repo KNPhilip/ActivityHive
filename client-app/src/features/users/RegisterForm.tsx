@@ -36,7 +36,7 @@ const RegisterForm = () => {
         >
           <Header
             as="h2"
-            content="Sign up to Reactivities"
+            content="Sign up to ActivityHive"
             color="teal"
             textAlign="center"
           />
