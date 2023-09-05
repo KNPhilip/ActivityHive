@@ -34,10 +34,10 @@ export class Activity implements IActivity {
   category: string;
   city: string;
   venue: string;
-  hostUsername?: string;
-  isCancelled?: boolean;
-  isGoing?: boolean;
-  isHost?: boolean;
+  hostUsername = "";
+  isCancelled = false;
+  isGoing = false;
+  isHost = false;
   host?: Profile;
   attendees: Profile[] = [];
 }
