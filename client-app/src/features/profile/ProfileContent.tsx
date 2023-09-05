@@ -8,28 +8,30 @@ import { useStore } from "../../app/stores/store";
 import ProfileActivities from "./ProfileActivities";
 
 interface Props {
-    profile: Profile;
+  profile: Profile;
 }
 
-const ProfileContent = ({profile}: Props) => {
-    const { profileStore } = useStore();
+const ProfileContent = ({ profile }: Props) => {
+  const { profileStore } = useStore();
 
-    const panes = [
-        {menuItem: 'About', render: () => <ProfileAbout />},
-        {menuItem: 'Photos', render: () => <ProfilePhotos profile={profile} />},
-        {menuItem: 'Events', render: () => <ProfileActivities /> },
-        {menuItem: 'Followers', render: () => <ProfileFollowings />},
-        {menuItem: 'Following', render: () => <ProfileFollowings />}
-    ]
+  const panes = [
+    { menuItem: "About", render: () => <ProfileAbout /> },
+    { menuItem: "Photos", render: () => <ProfilePhotos profile={profile} /> },
+    { menuItem: "Events", render: () => <ProfileActivities /> },
+    { menuItem: "Followers", render: () => <ProfileFollowings /> },
+    { menuItem: "Following", render: () => <ProfileFollowings /> },
+  ];
 
-    return (
-        <Tab 
-            menu={{fluid: true, vertical: true}}
-            menuPosition="right"
-            panes={panes}
-            onTabChange={(e, data) => profileStore.setActiveTab(data.activeIndex)}
-        />
-    )
-}
+  return (
+    <Tab
+      menu={{ fluid: true, vertical: true }}
+      menuPosition="right"
+      panes={panes}
+      onTabChange={(_, data) =>
+        profileStore.setActiveTab(Number(data.activeIndex))
+      }
+    />
+  );
+};
 
 export default observer(ProfileContent);

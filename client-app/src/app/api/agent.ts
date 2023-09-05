@@ -29,7 +29,7 @@ axios.interceptors.response.use(
         response.data,
         JSON.parse(pagination)
       );
-      return response as AxiosResponse<PaginatedResult<any>>;
+      return response as AxiosResponse<PaginatedResult<unknown>>;
     }
     return response;
   },
@@ -71,9 +71,10 @@ const responseBody = <T>(response: AxiosResponse<T>) => response.data;
 
 const requests = {
   get: <T>(url: string) => axios.get<T>(url).then(responseBody),
-  post: <T>(url: string, body: {}) =>
+  post: <T>(url: string, body: object) =>
     axios.post<T>(url, body).then(responseBody),
-  put: <T>(url: string, body: {}) => axios.put<T>(url, body).then(responseBody),
+  put: <T>(url: string, body: object) =>
+    axios.put<T>(url, body).then(responseBody),
   del: <T>(url: string) => axios.delete<T>(url).then(responseBody),
 };
 
@@ -94,7 +95,7 @@ const Activities = {
 const Profiles = {
   get: (username: string) => requests.get<Profile>(`/profile/${username}`),
   uploadPhoto: (file: Blob) => {
-    let formData = new FormData();
+    const formData = new FormData();
     formData.append("File", file);
     return axios.post<Photo>("photo", formData, {
       headers: { "Content-Type": "multipart/form-data" },
