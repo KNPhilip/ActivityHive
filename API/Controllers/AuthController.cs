@@ -41,5 +41,15 @@ namespace API.Controllers
             var response = await _authService.GetCurrentUser();
             return response.Success ? Ok(response.Data) : NotFound(response.Error);
         }
+
+        [HttpPost("fbLogin"), AllowAnonymous]
+        public async Task<ActionResult<UserDto>> FacebookLogin(string accessToken)
+        {
+            if (!await _authService.VerifyFacebookToken(accessToken))
+                return Unauthorized();
+
+            var response = await _authService.FacebookLogin(accessToken);
+            return response.Success ? Ok(response.Data) : NotFound(response.Error);
+        }
     }
 }

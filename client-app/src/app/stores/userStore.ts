@@ -5,62 +5,81 @@ import { store } from "./store";
 import router from "../router/Routes";
 
 export default class UserStore {
-    user: User | null = null;
+  user: User | null = null;
+  fbLoading = false;
 
-    constructor() {
-        makeAutoObservable(this);
-    }
+  constructor() {
+    makeAutoObservable(this);
+  }
 
-    get isLoggedIn() {
-        return !!this.user;
-    }
+  get isLoggedIn() {
+    return !!this.user;
+  }
 
-    login = async (creds: UserFormValues) => {
-        try {
-            const user = await agent.Auth.login(creds);
-            store.commonStore.setToken(user.token);
-            runInAction(() => this.user = user);
-            router.navigate('/activities');
-            store.modalStore.closeModal();
-        }
-        catch(error) {
-            throw error;
-        }
+  login = async (creds: UserFormValues) => {
+    try {
+      const user = await agent.Auth.login(creds);
+      store.commonStore.setToken(user.token);
+      runInAction(() => (this.user = user));
+      router.navigate("/activities");
+      store.modalStore.closeModal();
+    } catch (error) {
+      console.log(error);
+      throw error;
     }
+  };
 
-    register = async (creds: UserFormValues) => {
-        try {
-            const user = await agent.Auth.register(creds);
-            store.commonStore.setToken(user.token);
-            runInAction(() => this.user = user);
-            router.navigate('/activities');
-            store.modalStore.closeModal();
-        }
-        catch(error) {
-            throw error;
-        }
+  register = async (creds: UserFormValues) => {
+    try {
+      const user = await agent.Auth.register(creds);
+      store.commonStore.setToken(user.token);
+      runInAction(() => (this.user = user));
+      router.navigate("/activities");
+      store.modalStore.closeModal();
+    } catch (error) {
+      console.log(error);
+      throw error;
     }
+  };
 
-    logout = () => {
-        store.commonStore.setToken(null);
-        this.user = null;
-        router.navigate('/');
-    }
+  logout = () => {
+    store.commonStore.setToken(null);
+    this.user = null;
+    router.navigate("/");
+  };
 
-    getUser = async () => {
-        try {
-            const user = await agent.Auth.current();
-            runInAction(() => this.user = user)
-        } catch (error) {
-            console.log(error);
-        }
+  getUser = async () => {
+    try {
+      const user = await agent.Auth.current();
+      runInAction(() => (this.user = user));
+    } catch (error) {
+      console.log(error);
     }
+  };
 
-    setImage = (image: string) => {
-        if (this.user) this.user.image = image;
-    }
+  setImage = (image: string) => {
+    if (this.user) this.user.image = image;
+  };
 
-    setDisplayName = (name: string) => {
-        if (this.user) this.user.displayName = name;
+  setDisplayName = (name: string) => {
+    if (this.user) this.user.displayName = name;
+  };
+
+  facebookLogin = async (accessToken: string) => {
+    this.fbLoading = true;
+    try {
+      const user = await agent.Auth.fbLogin(accessToken);
+      store.commonStore.setToken(user.token);
+      runInAction(() => {
+        this.user = user;
+        this.fbLoading = false;
+      });
+      router.navigate("/activities");
+    } catch (error) {
+      console.log(error);
+      runInAction(() => {
+        this.fbLoading = false;
+      });
     }
+  };
 }
