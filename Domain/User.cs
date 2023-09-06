@@ -10,5 +10,6 @@ namespace Domain
         public ICollection<Photo> Photos { get; set; } = new List<Photo>();
         public ICollection<UserFollowing> Followings { get; set; } = new List<UserFollowing>();
         public ICollection<UserFollowing> Followers { get; set; } = new List<UserFollowing>();
+        public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
     }
 }
