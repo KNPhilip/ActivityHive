@@ -33,7 +33,7 @@ const HomePage = () => {
         </Header>
         {userStore.isLoggedIn ? (
           <>
-            <Header as="h2" inverted content="Welcome to Reactivities" />
+            <Header as="h2" inverted content="Welcome to ActivityHive" />
             <Button as={Link} to="/activities" size="huge" inverted>
               Go to Activities!
             </Button>
