@@ -11,5 +11,6 @@ namespace API.Services.AuthService
         Task<ServiceResponse<UserDto?>> GetCurrentUser();
         Task<bool> VerifyFacebookToken(string accessToken);
         Task<ServiceResponse<UserDto?>> FacebookLogin(string accessToken);
+        Task<ServiceResponse<UserDto>> RefreshJWT();
     }
 }

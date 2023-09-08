@@ -61,6 +61,7 @@ namespace API.Services.AuthService
             bool result = await _userManager.CheckPasswordAsync(user, request.Password);
             if (result)
             {
+                await SetRefreshToken(user);
                 UserDto returningUser = CreateUserObject(user);
                 return ServiceResponse<UserDto?>.SuccessResponse(returningUser);
             }
@@ -86,6 +87,7 @@ namespace API.Services.AuthService
 
             if (result.Succeeded)
             {
+                await SetRefreshToken(user);
                 UserDto returningUser = CreateUserObject(user);
                 ServiceResponse<UserDto>.SuccessResponse(returningUser);
             }
@@ -99,10 +101,14 @@ namespace API.Services.AuthService
                 .Include(u => u.Photos)
                 .FirstOrDefaultAsync(x => x.Email == _httpContextAccessor.HttpContext!.User.FindFirstValue(ClaimTypes.Email));
             var userDto = CreateUserObject(user!);
+
             if (userDto is null)
                 return new ServiceResponse<UserDto?> { Error = "User not found." };
             else
+            {
+                await SetRefreshToken(user!);
                 return ServiceResponse<UserDto?>.SuccessResponse(userDto);
+            }
         }
 
         public async Task<bool> VerifyFacebookToken(string accessToken)
@@ -146,7 +152,24 @@ namespace API.Services.AuthService
             if (!result.Succeeded)
                 return new ServiceResponse<UserDto?> { Error = "Problem creating user account" };
 
+            await SetRefreshToken(user);
             return ServiceResponse<UserDto?>.SuccessResponse(CreateUserObject(user));
+        }
+
+        public async Task<ServiceResponse<UserDto>> RefreshJWT()
+        {
+            string? refreshToken = _httpContextAccessor.HttpContext!.Request.Cookies["refreshToken"];
+            User? user = await _userManager.Users
+                .Include(u => u.RefreshTokens)
+                .Include(u => u.Photos)
+                .FirstOrDefaultAsync(u => u.UserName == _httpContextAccessor.HttpContext!.User.FindFirstValue(ClaimTypes.Name));
+
+            RefreshToken? oldToken = user?.RefreshTokens.SingleOrDefault(x => x.Token == refreshToken);
+
+            if (user is null || oldToken is not null && !oldToken.IsActive) return new ServiceResponse<UserDto> { Error = "No valid Refresh Tokens found." };
+
+            UserDto returning = CreateUserObject(user);
+            return ServiceResponse<UserDto>.SuccessResponse(returning);
         }
 
         private UserDto CreateUserObject(User user)
@@ -160,12 +183,28 @@ namespace API.Services.AuthService
             };
         }
 
-        public RefreshToken GenerateRefreshToken() 
+        private static RefreshToken GenerateRefreshToken() 
         {
             var randomNumber = new byte[32];
             using var rng = RandomNumberGenerator.Create();
             rng.GetBytes(randomNumber);
             return new RefreshToken{Token = Convert.ToBase64String(randomNumber)};
+        }
+
+        private async Task SetRefreshToken(User user)
+        {
+            RefreshToken refreshToken = GenerateRefreshToken();
+
+            user.RefreshTokens.Add(refreshToken);
+            await _userManager.UpdateAsync(user);
+
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = DateTime.UtcNow.AddDays(7)
+            };
+
+            _httpContextAccessor.HttpContext!.Response.Cookies.Append("refreshToken", refreshToken.Token, cookieOptions);
         }
     }
 }
