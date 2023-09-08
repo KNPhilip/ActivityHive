@@ -1,7 +1,9 @@
+using System.Security.Claims;
 using API.Dtos;
 using API.Services.AuthService;
 using Application.Core;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace API.Controllers
 {
@@ -9,9 +11,11 @@ namespace API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
+        private readonly UserManager<User> _userManager;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, UserManager<User> userManager)
         {
+            _userManager = userManager;
             _authService = authService;
         }
 
@@ -26,6 +30,7 @@ namespace API.Controllers
         public async Task<ActionResult<ServiceResponse<UserDto>>> Register(RegisterDto request)
         {
             var response = await _authService.Register(request);
+
             if (response.Success)
                 return Ok(response.Data);
             else 
@@ -50,6 +55,13 @@ namespace API.Controllers
 
             var response = await _authService.FacebookLogin(accessToken);
             return response.Success ? Ok(response.Data) : NotFound(response.Error);
+        }
+
+        [HttpPost("refreshToken"), Authorize]
+        public async Task<ActionResult<UserDto>> RefreshToken()
+        {
+            var response = await _authService.RefreshJWT();
+            return response.Success ? Ok(response.Data) : Unauthorized(response.Error);
         }
     }
 }
