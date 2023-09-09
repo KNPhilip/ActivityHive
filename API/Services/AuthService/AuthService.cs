@@ -54,14 +54,16 @@ namespace API.Services.AuthService
 
         public async Task<ServiceResponse<UserDto?>> Login(LoginDto request)
         {
-            User? user = await _userManager.FindByEmailAsync(request.Email);
+            User? user = await _userManager.Users
+                .Include(u => u.Photos)
+                .FirstOrDefaultAsync(u => u.Email == request.Email);
+
             if (user is null) 
                 return new ServiceResponse<UserDto?> { Error = "Incorrect email or password." };
 
             bool result = await _userManager.CheckPasswordAsync(user, request.Password);
             if (result)
             {
-                await SetRefreshToken(user);
                 UserDto returningUser = CreateUserObject(user);
                 return ServiceResponse<UserDto?>.SuccessResponse(returningUser);
             }
@@ -87,7 +89,6 @@ namespace API.Services.AuthService
 
             if (result.Succeeded)
             {
-                await SetRefreshToken(user);
                 UserDto returningUser = CreateUserObject(user);
                 ServiceResponse<UserDto>.SuccessResponse(returningUser);
             }
@@ -105,10 +106,7 @@ namespace API.Services.AuthService
             if (userDto is null)
                 return new ServiceResponse<UserDto?> { Error = "User not found." };
             else
-            {
-                await SetRefreshToken(user!);
                 return ServiceResponse<UserDto?>.SuccessResponse(userDto);
-            }
         }
 
         public async Task<bool> VerifyFacebookToken(string accessToken)
@@ -152,7 +150,6 @@ namespace API.Services.AuthService
             if (!result.Succeeded)
                 return new ServiceResponse<UserDto?> { Error = "Problem creating user account" };
 
-            await SetRefreshToken(user);
             return ServiceResponse<UserDto?>.SuccessResponse(CreateUserObject(user));
         }
 
@@ -172,7 +169,7 @@ namespace API.Services.AuthService
             return ServiceResponse<UserDto>.SuccessResponse(returning);
         }
 
-        private UserDto CreateUserObject(User user)
+        public UserDto CreateUserObject(User user)
         {
             return new()
             {
@@ -181,30 +178,6 @@ namespace API.Services.AuthService
                 Token = CreateJWT(user),
                 Username = user.UserName
             };
-        }
-
-        private static RefreshToken GenerateRefreshToken() 
-        {
-            var randomNumber = new byte[32];
-            using var rng = RandomNumberGenerator.Create();
-            rng.GetBytes(randomNumber);
-            return new RefreshToken{Token = Convert.ToBase64String(randomNumber)};
-        }
-
-        private async Task SetRefreshToken(User user)
-        {
-            RefreshToken refreshToken = GenerateRefreshToken();
-
-            user.RefreshTokens.Add(refreshToken);
-            await _userManager.UpdateAsync(user);
-
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                Expires = DateTime.UtcNow.AddDays(7)
-            };
-
-            _httpContextAccessor.HttpContext!.Response.Cookies.Append("refreshToken", refreshToken.Token, cookieOptions);
         }
     }
 }
