@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Security.Cryptography;
 using API.Dtos;
 using API.Services.AuthService;
 using Application.Core;
@@ -22,8 +23,19 @@ namespace API.Controllers
         [HttpPost("login"), AllowAnonymous]
         public async Task<ActionResult<ServiceResponse<UserDto>>> Login(LoginDto request)
         {
+            User? user = await _userManager.Users
+                .FirstOrDefaultAsync(u => u.Email == request.Email);
+
+            if (user is null) return Unauthorized();
+
             var response = await _authService.Login(request);
-            return response.Success ? Ok(response.Data) : Unauthorized(response.Error ?? "You are not authorized.");
+
+            if (response.Success)
+            {
+                await SetRefreshToken(user);
+                return Ok(response.Data);
+            }
+            else return Unauthorized(response.Error ?? "You are not authorized.");
         }
 
         [HttpPost("register"), AllowAnonymous]
@@ -32,7 +44,15 @@ namespace API.Controllers
             var response = await _authService.Register(request);
 
             if (response.Success)
+            {
+                User? user = await _userManager.Users
+                    .FirstOrDefaultAsync(u => u.UserName == response.Data!.Username);
+
+                if (user is null) return Unauthorized();
+                
+                await SetRefreshToken(user);
                 return Ok(response.Data);
+            }
             else 
             {
                 ModelState.AddModelError("user", "Email or username already taken.");
@@ -43,8 +63,18 @@ namespace API.Controllers
         [HttpGet, Authorize]
         public async Task<ActionResult<UserDto>> GetCurrentUser()
         {
+            User? user = await _userManager.Users
+                .FirstOrDefaultAsync(u => u.Email == User.FindFirstValue(ClaimTypes.Email));
+
+            if (user is null) return Unauthorized();
+
             var response = await _authService.GetCurrentUser();
-            return response.Success ? Ok(response.Data) : NotFound(response.Error);
+            if (response.Success)
+            {
+                await SetRefreshToken(user!);
+                return Ok(response.Data);
+            }
+            else return NotFound(response.Error);
         }
 
         [HttpPost("fbLogin"), AllowAnonymous]
@@ -62,6 +92,30 @@ namespace API.Controllers
         {
             var response = await _authService.RefreshJWT();
             return response.Success ? Ok(response.Data) : Unauthorized(response.Error);
+        }
+
+        private async Task SetRefreshToken(User user)
+        {
+            RefreshToken refreshToken = GenerateRefreshToken();
+
+            user.RefreshTokens.Add(refreshToken);
+            await _userManager.UpdateAsync(user);
+
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = DateTime.UtcNow.AddDays(7)
+            };
+
+            Response.Cookies.Append("refreshToken", refreshToken.Token, cookieOptions);
+        }
+
+        private static RefreshToken GenerateRefreshToken() 
+        {
+            var randomNumber = new byte[32];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomNumber);
+            return new RefreshToken{Token = Convert.ToBase64String(randomNumber)};
         }
     }
 }
