@@ -86,6 +86,7 @@ try
 {
     var context = services.GetRequiredService<DataContext>();
     var userManager = services.GetRequiredService<UserManager<User>>();
+    await context.Database.EnsureDeletedAsync();
     await context.Database.MigrateAsync();
     await Seed.SeedData(context, userManager);
 }
