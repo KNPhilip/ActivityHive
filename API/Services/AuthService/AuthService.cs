@@ -1,6 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
 using API.Dtos;
 using Application.Core;
@@ -14,13 +13,16 @@ namespace API.Services.AuthService
         private readonly UserManager<User> _userManager;
         private readonly IConfiguration _config;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly SignInManager<User> _signInManager;
         private readonly HttpClient _httpClient;
 
-        public AuthService(UserManager<User> userManager, IConfiguration config, IHttpContextAccessor httpContextAccessor)
+        public AuthService(UserManager<User> userManager, IConfiguration config, 
+            IHttpContextAccessor httpContextAccessor, SignInManager<User> signInManager)
         {
             _userManager = userManager;
             _config = config;
             _httpContextAccessor = httpContextAccessor;
+            _signInManager = signInManager;
             _httpClient = new HttpClient
             {
                 BaseAddress = new Uri("https://graph.facebook.com")
@@ -59,15 +61,18 @@ namespace API.Services.AuthService
                 .FirstOrDefaultAsync(u => u.Email == request.Email);
 
             if (user is null) 
-                return new ServiceResponse<UserDto?> { Error = "Incorrect email or password." };
+                return new ServiceResponse<UserDto?> { Error = "Invalid email" };
 
-            bool result = await _userManager.CheckPasswordAsync(user, request.Password);
-            if (result)
+            if (!user.EmailConfirmed)
+                return new ServiceResponse<UserDto?> { Error = "Email not confirmed" };
+
+            var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
+            if (result.Succeeded)
             {
                 UserDto returningUser = CreateUserObject(user);
                 return ServiceResponse<UserDto?>.SuccessResponse(returningUser);
             }
-            return new ServiceResponse<UserDto?> { Error = "Incorrect email or password." };
+            return new ServiceResponse<UserDto?> { Error = "Invalid password" };
         }
 
         public async Task<ServiceResponse<UserDto?>> Register(RegisterDto request)
