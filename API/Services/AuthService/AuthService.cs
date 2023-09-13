@@ -1,10 +1,11 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
 using API.Dtos;
 using Application.Core;
+using Infrastructure.Email;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.IdentityModel.Tokens;
 
 namespace API.Services.AuthService
@@ -14,13 +15,19 @@ namespace API.Services.AuthService
         private readonly UserManager<User> _userManager;
         private readonly IConfiguration _config;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly SignInManager<User> _signInManager;
+        private readonly EmailSender _emailSender;
         private readonly HttpClient _httpClient;
 
-        public AuthService(UserManager<User> userManager, IConfiguration config, IHttpContextAccessor httpContextAccessor)
+        public AuthService(UserManager<User> userManager, IConfiguration config, 
+            IHttpContextAccessor httpContextAccessor, SignInManager<User> signInManager,
+            EmailSender emailSender)
         {
             _userManager = userManager;
             _config = config;
             _httpContextAccessor = httpContextAccessor;
+            _signInManager = signInManager;
+            _emailSender = emailSender;
             _httpClient = new HttpClient
             {
                 BaseAddress = new Uri("https://graph.facebook.com")
@@ -59,15 +66,18 @@ namespace API.Services.AuthService
                 .FirstOrDefaultAsync(u => u.Email == request.Email);
 
             if (user is null) 
-                return new ServiceResponse<UserDto?> { Error = "Incorrect email or password." };
+                return new ServiceResponse<UserDto?> { Error = "Invalid email" };
 
-            bool result = await _userManager.CheckPasswordAsync(user, request.Password);
-            if (result)
+            if (!user.EmailConfirmed)
+                return new ServiceResponse<UserDto?> { Error = "Email not confirmed" };
+
+            var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
+            if (result.Succeeded)
             {
                 UserDto returningUser = CreateUserObject(user);
                 return ServiceResponse<UserDto?>.SuccessResponse(returningUser);
             }
-            return new ServiceResponse<UserDto?> { Error = "Incorrect email or password." };
+            return new ServiceResponse<UserDto?> { Error = "Invalid password" };
         }
 
         public async Task<ServiceResponse<UserDto?>> Register(RegisterDto request)
@@ -87,13 +97,26 @@ namespace API.Services.AuthService
 
             var result = await _userManager.CreateAsync(user, request.Password);
 
+            /* Old Code
             if (result.Succeeded)
             {
                 UserDto returningUser = CreateUserObject(user);
                 ServiceResponse<UserDto>.SuccessResponse(returningUser);
             }
 
-            return new ServiceResponse<UserDto?> { Error = "Please make a stronger password." };
+            return new ServiceResponse<UserDto?> { Error = "Please make a stronger password." }; */
+
+            if (!result.Succeeded) return new ServiceResponse<UserDto?> { Error = "Problem registering user" };
+
+            var origin = _httpContextAccessor.HttpContext!.Request.Headers["origin"];
+            string token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+
+            string verifyUrl = $"{origin}/account/verifyEmail?token={token}&email={user.Email}";
+            string message = $"<p>Please click the below link to verify your email address:</p><p><a href='{verifyUrl}'>Click to verify email</a></p>";
+
+            await _emailSender.SendEmailAsync(user.Email, "Please verify email", message);
+            return ServiceResponse<UserDto?>.SuccessResponse(new UserDto());
         }
 
         public async Task<ServiceResponse<UserDto?>> GetCurrentUser()

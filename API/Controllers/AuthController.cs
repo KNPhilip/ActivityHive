@@ -1,10 +1,13 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Text;
 using API.Dtos;
 using API.Services.AuthService;
 using Application.Core;
+using Infrastructure.Email;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace API.Controllers
 {
@@ -13,10 +16,12 @@ namespace API.Controllers
     {
         private readonly IAuthService _authService;
         private readonly UserManager<User> _userManager;
+        private readonly EmailSender _emailSender;
 
-        public AuthController(IAuthService authService, UserManager<User> userManager)
+        public AuthController(IAuthService authService, UserManager<User> userManager, EmailSender emailSender)
         {
             _userManager = userManager;
+            _emailSender = emailSender;
             _authService = authService;
         }
 
@@ -92,6 +97,41 @@ namespace API.Controllers
         {
             var response = await _authService.RefreshJWT();
             return response.Success ? Ok(response.Data) : Unauthorized(response.Error);
+        }
+
+        [HttpPost("verifyEmail"), AllowAnonymous]
+        public async Task<IActionResult> VerifyEmail(string token, string email)
+        {
+            User? user = await _userManager.FindByEmailAsync(email);
+
+            if (user is null) return Unauthorized();
+
+            byte[] decodedTokenBytes = WebEncoders.Base64UrlDecode(token);
+            string decodedToken = Encoding.UTF8.GetString(decodedTokenBytes);
+            IdentityResult result = await _userManager.ConfirmEmailAsync(user, decodedToken);
+
+            if (!result.Succeeded) return BadRequest("Could not verify email address.");
+
+            return Ok("Email confirmed, you can now login");
+        }
+
+        [HttpGet("resendEmailConfirmationLink"), AllowAnonymous]
+        public async Task<IActionResult> ResendEmailConfirmationLink(string email)
+        {
+            User? user = await _userManager.FindByEmailAsync(email);
+
+            if (user is null) return Unauthorized();
+
+            var origin = Request.Headers["origin"];
+            string token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+
+            string verifyUrl = $"{origin}/account/verifyEmail?token={token}&email={user.Email}";
+            string message = $"<p>Please click the below link to verify your email address:</p><p><a href='{verifyUrl}'>Click to verify email</a></p>";
+
+            await _emailSender.SendEmailAsync(user.Email!, "Please verify email", message);
+            
+            return Ok("Email verification link resent");
         }
 
         private async Task SetRefreshToken(User user)
