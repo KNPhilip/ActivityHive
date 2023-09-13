@@ -1,10 +1,12 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Text;
 using API.Dtos;
 using API.Services.AuthService;
 using Application.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace API.Controllers
 {
@@ -92,6 +94,20 @@ namespace API.Controllers
         {
             var response = await _authService.RefreshJWT();
             return response.Success ? Ok(response.Data) : Unauthorized(response.Error);
+        }
+
+        [HttpPost("verifyEmail"), AllowAnonymous]
+        public async Task<IActionResult> VerifyEmail(string token, string email)
+        {
+            User? user = await _userManager.FindByEmailAsync(email);
+            if (user is null) return Unauthorized();
+            byte[] decodedTokenBytes = WebEncoders.Base64UrlDecode(token);
+            string decodedToken = Encoding.UTF8.GetString(decodedTokenBytes);
+            IdentityResult result = await _userManager.ConfirmEmailAsync(user, decodedToken);
+
+            if (!result.Succeeded) return BadRequest("Could not verify email address.");
+
+            return Ok("Email confirmed, you can now login");
         }
 
         private async Task SetRefreshToken(User user)
