@@ -124,13 +124,20 @@ const Profiles = {
 };
 
 const Auth = {
-  current: () => requests.get<User>("/auth"),
-  login: (user: UserFormValues) => requests.post<User>("auth/login", user),
+  current: () =>
+    requests.get<User>("/auth"),
+  login: (user: UserFormValues) =>
+    requests.post<User>("auth/login", user),
   register: (user: UserFormValues) =>
     requests.post<User>("auth/register", user),
   fbLogin: (accessToken: string) =>
     requests.post<User>(`/auth/fbLogin?accessToken=${accessToken}`, {}),
-  refreshToken: () => requests.post<User>("/auth/refreshToken", {}),
+  refreshToken: () =>
+    requests.post<User>("/auth/refreshToken", {}),
+  verifyEmail: (token: string, email: string) => 
+    requests.post<void>(`/auth/verifyEmail?token=${token}&email=${email}`, {}),
+  resendEmailConfirm: (email: string) =>
+    requests.get(`/auth/resendEmailConfirmationLink?email=${email}`),
 };
 
 const agent = {
