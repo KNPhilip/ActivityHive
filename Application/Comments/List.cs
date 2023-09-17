@@ -1,7 +1,6 @@
 using Application.Core;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using Domain;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
@@ -26,14 +25,13 @@ namespace Application.Comments
                 
             }
 
-
             public async Task<ServiceResponse<List<CommentDto>>?> Handle(Query request, CancellationToken cancellationToken)
             {
                 List<CommentDto> comments = await _context.Comments
                     .Where(x => x.Activity!.Id == request.ActivityId)
                     .OrderByDescending(x => x.CreatedAt)
                     .ProjectTo<CommentDto>(_mapper.ConfigurationProvider)
-                    .ToListAsync();
+                    .ToListAsync(CancellationToken.None);
 
                 return ServiceResponse<List<CommentDto>>.SuccessResponse(comments);
             }

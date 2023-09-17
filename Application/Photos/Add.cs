@@ -36,7 +36,7 @@ namespace Application.Photos
 
                 if (user is null) return null;
 
-                var photoUploadResult = await _photoAccessor.AddPhoto(request.File!);
+                PhotoUploadResult? photoUploadResult = await _photoAccessor.AddPhoto(request.File!);
 
                 Photo photo = new()
                 {

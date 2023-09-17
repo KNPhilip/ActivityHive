@@ -12,19 +12,19 @@ namespace Persistence
             {
                 var users = new List<User>
                 {
-                    new User
+                    new()
                     {
                         DisplayName = "Bob",
                         UserName = "bob",
                         Email = "bob@test.com"
                     },
-                    new User
+                    new()
                     {
                         DisplayName = "Jane",
                         UserName = "jane",
                         Email = "jane@test.com"
                     },
-                    new User
+                    new()
                     {
                         DisplayName = "Tom",
                         UserName = "tom",
@@ -39,7 +39,7 @@ namespace Persistence
 
                 var activities = new List<Activity>
                 {
-                    new Activity
+                    new()
                     {
                         Title = "Past Activity 1",
                         Date = DateTime.UtcNow.AddMonths(-2),
@@ -49,14 +49,14 @@ namespace Persistence
                         Venue = "Pub",
                         Attendees = new List<ActivityAttendee>
                         {
-                            new ActivityAttendee
+                            new()
                             {
                                 User = users[0],
                                 IsHost = true
                             }
                         }
                     },
-                    new Activity
+                    new()
                     {
                         Title = "Past Activity 2",
                         Date = DateTime.UtcNow.AddMonths(-1),
@@ -66,19 +66,19 @@ namespace Persistence
                         Venue = "The Louvre",
                         Attendees = new List<ActivityAttendee>
                         {
-                            new ActivityAttendee
+                            new()
                             {
                                 User = users[0],
                                 IsHost = true
                             },
-                            new ActivityAttendee
+                            new()
                             {
                                 User = users[1],
                                 IsHost = false
                             },
                         }
                     },
-                    new Activity
+                    new()
                     {
                         Title = "Future Activity 1",
                         Date = DateTime.UtcNow.AddMonths(1),
@@ -88,19 +88,19 @@ namespace Persistence
                         Venue = "Wembly Stadium",
                         Attendees = new List<ActivityAttendee>
                         {
-                            new ActivityAttendee
+                            new()
                             {
                                 User = users[2],
                                 IsHost = true
                             },
-                            new ActivityAttendee
+                            new()
                             {
                                 User = users[1],
                                 IsHost = false
                             },
                         }
                     },
-                    new Activity
+                    new()
                     {
                         Title = "Future Activity 2",
                         Date = DateTime.UtcNow.AddMonths(2),
@@ -110,19 +110,19 @@ namespace Persistence
                         Venue = "Jamies Italian",
                         Attendees = new List<ActivityAttendee>
                         {
-                            new ActivityAttendee
+                            new()
                             {
                                 User = users[0],
                                 IsHost = true
                             },
-                            new ActivityAttendee
+                            new()
                             {
                                 User = users[2],
                                 IsHost = false
                             },
                         }
                     },
-                    new Activity
+                    new()
                     {
                         Title = "Future Activity 3",
                         Date = DateTime.UtcNow.AddMonths(3),
@@ -132,19 +132,19 @@ namespace Persistence
                         Venue = "Pub",
                         Attendees = new List<ActivityAttendee>
                         {
-                            new ActivityAttendee
+                            new()
                             {
                                 User = users[1],
                                 IsHost = true                            
                             },
-                            new ActivityAttendee
+                            new()
                             {
                                 User = users[0],
                                 IsHost = false                            
                             },
                         }
                     },
-                    new Activity
+                    new()
                     {
                         Title = "Future Activity 4",
                         Date = DateTime.UtcNow.AddMonths(4),
@@ -154,14 +154,14 @@ namespace Persistence
                         Venue = "British Museum",
                         Attendees = new List<ActivityAttendee>
                         {
-                            new ActivityAttendee
+                            new()
                             {
                                 User = users[1],
                                 IsHost = true                            
                             }
                         }
                     },
-                    new Activity
+                    new()
                     {
                         Title = "Future Activity 5",
                         Date = DateTime.UtcNow.AddMonths(5),
@@ -171,19 +171,19 @@ namespace Persistence
                         Venue = "Punch and Judy",
                         Attendees = new List<ActivityAttendee>
                         {
-                            new ActivityAttendee
+                            new()
                             {
                                 User = users[0],
                                 IsHost = true                            
                             },
-                            new ActivityAttendee
+                            new()
                             {
                                 User = users[1],
                                 IsHost = false                            
                             },
                         }
                     },
-                    new Activity
+                    new()
                     {
                         Title = "Future Activity 6",
                         Date = DateTime.UtcNow.AddMonths(6),
@@ -193,19 +193,19 @@ namespace Persistence
                         Venue = "O2 Arena",
                         Attendees = new List<ActivityAttendee>
                         {
-                            new ActivityAttendee
+                            new()
                             {
                                 User = users[2],
                                 IsHost = true                            
                             },
-                            new ActivityAttendee
+                            new()
                             {
                                 User = users[1],
                                 IsHost = false                            
                             },
                         }
                     },
-                    new Activity
+                    new()
                     {
                         Title = "Future Activity 7",
                         Date = DateTime.UtcNow.AddMonths(7),
@@ -215,19 +215,19 @@ namespace Persistence
                         Venue = "All",
                         Attendees = new List<ActivityAttendee>
                         {
-                            new ActivityAttendee
+                            new()
                             {
                                 User = users[0],
                                 IsHost = true                            
                             },
-                            new ActivityAttendee
+                            new()
                             {
                                 User = users[2],
                                 IsHost = false                            
                             },
                         }
                     },
-                    new Activity
+                    new()
                     {
                         Title = "Future Activity 8",
                         Date = DateTime.UtcNow.AddMonths(8),
@@ -237,12 +237,12 @@ namespace Persistence
                         Venue = "Pub",
                         Attendees = new List<ActivityAttendee>
                         {
-                            new ActivityAttendee
+                            new()
                             {
                                 User = users[2],
                                 IsHost = true                            
                             },
-                            new ActivityAttendee
+                            new()
                             {
                                 User = users[1],
                                 IsHost = false                            

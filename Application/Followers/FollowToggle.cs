@@ -49,9 +49,7 @@ namespace Application.Followers
                     _context.UserFollowings.Add(following);
                 }
                 else 
-                {
                     _context.UserFollowings.Remove(following);
-                }
 
                 bool success = await _context
                     .SaveChangesAsync(CancellationToken.None) > 0;

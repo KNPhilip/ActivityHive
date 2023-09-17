@@ -4,7 +4,6 @@ using Application.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Persistence;
 
 namespace Application.Activities
@@ -39,14 +38,10 @@ namespace Application.Activities
                     .AsQueryable();
 
                 if (request.Params!.IsGoing && !request.Params.IsHost)
-                {
                     query = query.Where(x => x.Attendees.Any(a => a.Username == _userAccessor.GetUsername()));
-                }
 
                 if (request.Params.IsHost && !request.Params.IsGoing)
-                {
                     query = query.Where(x => x.HostUsername == _userAccessor.GetUsername());
-                }
 
                 return ServiceResponse<PagedList<ActivityDto>>.SuccessResponse(
                     await PagedList<ActivityDto>

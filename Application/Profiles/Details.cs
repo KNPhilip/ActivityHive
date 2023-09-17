@@ -2,7 +2,6 @@ using Application.Core;
 using Application.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using Domain;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
@@ -13,7 +12,7 @@ namespace Application.Profiles
     {
         public class Query : IRequest<ServiceResponse<Profile>?>
         {
-            public string Username { get; set; }
+            public string? Username { get; set; }
         }
 
         public class Handler : IRequestHandler<Query, ServiceResponse<Profile>?>

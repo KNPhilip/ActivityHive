@@ -37,9 +37,9 @@ namespace Application.Activities
                     x.UserName == _userAccessor.GetUsername(), CancellationToken.None);
                 if (user is null) return null;
 
-                string? hostUsername = activity.Attendees?.FirstOrDefault(x => x.IsHost)?.User.UserName;
+                string? hostUsername = activity.Attendees?.FirstOrDefault(x => x.IsHost)?.User!.UserName;
 
-                ActivityAttendee? attendant = activity.Attendees?.FirstOrDefault(x => x.User.UserName == user.UserName);
+                ActivityAttendee? attendant = activity.Attendees?.FirstOrDefault(x => x.User!.UserName == user.UserName);
 
                 if (attendant is not null && hostUsername == user.UserName)
                     activity.IsCancelled = !activity.IsCancelled;
