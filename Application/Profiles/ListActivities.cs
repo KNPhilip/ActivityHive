@@ -3,7 +3,6 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
 using Persistence;
 
 namespace Application.Profiles
@@ -30,8 +29,8 @@ namespace Application.Profiles
             public async Task<ServiceResponse<List<UserActivityDto>>?> Handle(Query request, CancellationToken cancellationToken)
             {
                 var query = _context.ActivityAttendees
-                    .Where(u => u.User.UserName == request.Username)
-                    .OrderBy(a => a.Activity.Date)
+                    .Where(u => u.User!.UserName == request.Username)
+                    .OrderBy(a => a.Activity!.Date)
                     .ProjectTo<UserActivityDto>(_mapper.ConfigurationProvider)
                     .AsQueryable();
 

@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using System.Security.Cryptography.X509Certificates;
 using Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -29,7 +28,7 @@ namespace Infrastructure.Security
             if (userId is null)
                 return Task.CompletedTask;
 
-            var activityId = Guid.Parse(_httpContextAccessor.HttpContext?.Request.RouteValues
+            Guid activityId = Guid.Parse(_httpContextAccessor.HttpContext?.Request.RouteValues
                 .SingleOrDefault(x => x.Key == "id").Value?.ToString()!);
 
             ActivityAttendee? attendee = _dbContext.ActivityAttendees

@@ -8,6 +8,7 @@ using Infrastructure.Email;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Primitives;
 
 namespace API.Controllers
 {
@@ -60,7 +61,7 @@ namespace API.Controllers
             }
             else 
             {
-                ModelState.AddModelError("user", "Email or username already taken.");
+                ModelState.AddModelError("user", response.Error);
                 return ValidationProblem();
             }
         }
@@ -122,7 +123,7 @@ namespace API.Controllers
 
             if (user is null) return Unauthorized();
 
-            var origin = Request.Headers["origin"];
+            StringValues origin = Request.Headers["origin"];
             string token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
 
@@ -141,7 +142,7 @@ namespace API.Controllers
             user.RefreshTokens.Add(refreshToken);
             await _userManager.UpdateAsync(user);
 
-            var cookieOptions = new CookieOptions
+            CookieOptions cookieOptions = new()
             {
                 HttpOnly = true,
                 Expires = DateTime.UtcNow.AddDays(7)
@@ -152,7 +153,7 @@ namespace API.Controllers
 
         private static RefreshToken GenerateRefreshToken() 
         {
-            var randomNumber = new byte[32];
+            byte[] randomNumber = new byte[32];
             using var rng = RandomNumberGenerator.Create();
             rng.GetBytes(randomNumber);
             return new RefreshToken{Token = Convert.ToBase64String(randomNumber)};

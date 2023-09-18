@@ -4,6 +4,9 @@ using Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+
+// using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
 
 namespace API.Extensions
@@ -15,8 +18,10 @@ namespace API.Extensions
         {
             services.AddIdentityCore<User>(options => {
                 options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireDigit = false;
                 options.User.RequireUniqueEmail = true;
-                options.SignIn.RequireConfirmedEmail = true;
+                // Email verification is disabled in production
+                // options.SignIn.RequireConfirmedEmail = true;
             })
             .AddEntityFrameworkStores<DataContext>()
             .AddSignInManager<SignInManager<User>>()
@@ -37,12 +42,10 @@ namespace API.Extensions
                 {
                     OnMessageReceived = context => 
                     {
-                        var accessToken = context.Request.Query["access_token"];
-                        var path = context.HttpContext.Request.Path;
+                        StringValues accessToken = context.Request.Query["access_token"];
+                        PathString path = context.HttpContext.Request.Path;
                         if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chat"))
-                        {
                             context.Token = accessToken;
-                        }
                         return Task.CompletedTask;
                     }
                 };

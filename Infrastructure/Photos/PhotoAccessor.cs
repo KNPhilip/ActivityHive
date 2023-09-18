@@ -13,7 +13,8 @@ namespace Infrastructure.Photos
 
         public PhotoAccessor(IOptions<CloudinarySettings> settings)
         {
-            Account account = new(
+            Account account = new
+            (
                 settings.Value.CloudName,
                 settings.Value.ApiKey,
                 settings.Value.ApiSecret
@@ -36,9 +37,7 @@ namespace Infrastructure.Photos
                 ImageUploadResult uploadResult = await _cloudinary.UploadAsync(uploadParams);
 
                 if (uploadResult.Error != null)
-                {
                     throw new Exception(uploadResult.Error.Message);
-                }
 
                 return new PhotoUploadResult
                 {

@@ -15,9 +15,9 @@ namespace Infrastructure.Email
 
         public async Task SendEmailAsync(string userEmail, string emailSubject, string msg)
         {
-            var client = new SendGridClient(_config["Sendgrid:Key"]);
+            SendGridClient client = new(_config["Sendgrid:Key"]);
 
-            var message = new SendGridMessage
+            SendGridMessage message = new()
             {
                 From = new EmailAddress("knphilip@outlook.com", _config["Sendgrid:User"]),
                 Subject = emailSubject,

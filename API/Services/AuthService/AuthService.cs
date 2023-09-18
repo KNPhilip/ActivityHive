@@ -6,6 +6,7 @@ using Application.Core;
 using Infrastructure.Email;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
 
 namespace API.Services.AuthService
@@ -43,8 +44,8 @@ namespace API.Services.AuthService
                 new Claim(ClaimTypes.Name, user.UserName!)
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["TokenKey"]!));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+            SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(_config["TokenKey"]!));
+            SigningCredentials creds = new(key, SecurityAlgorithms.HmacSha512Signature);
 
             SecurityTokenDescriptor tokenDescriptor = new()
             {
@@ -53,8 +54,8 @@ namespace API.Services.AuthService
                 SigningCredentials = creds
             };
 
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var token = tokenHandler.CreateToken(tokenDescriptor);
+            JwtSecurityTokenHandler tokenHandler = new();
+            SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
 
             return tokenHandler.WriteToken(token);
         }
@@ -68,11 +69,14 @@ namespace API.Services.AuthService
             if (user is null) 
                 return new ServiceResponse<UserDto?> { Error = "Invalid email" };
 
+            /* Email verification is disabled in production
             if (!user.EmailConfirmed)
                 return new ServiceResponse<UserDto?> { Error = "Email not confirmed" };
 
             var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
-            if (result.Succeeded)
+            if (result.Succeeded) */
+            bool result = await _userManager.CheckPasswordAsync(user, request.Password);
+            if (result)
             {
                 UserDto returningUser = CreateUserObject(user);
                 return ServiceResponse<UserDto?>.SuccessResponse(returningUser);
@@ -95,20 +99,20 @@ namespace API.Services.AuthService
                 UserName = request.Username,
             };
 
-            var result = await _userManager.CreateAsync(user, request.Password);
+            IdentityResult result = await _userManager.CreateAsync(user, request.Password);
 
-            /* Old Code
             if (result.Succeeded)
             {
                 UserDto returningUser = CreateUserObject(user);
                 ServiceResponse<UserDto>.SuccessResponse(returningUser);
             }
 
-            return new ServiceResponse<UserDto?> { Error = "Please make a stronger password." }; */
+            return new ServiceResponse<UserDto?> { Error = "Please make a stronger password." };
 
+            /* Email verification is disabled in production
             if (!result.Succeeded) return new ServiceResponse<UserDto?> { Error = "Problem registering user" };
 
-            var origin = _httpContextAccessor.HttpContext!.Request.Headers["origin"];
+            StringValues origin = _httpContextAccessor.HttpContext!.Request.Headers["origin"];
             string token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
 
@@ -116,7 +120,7 @@ namespace API.Services.AuthService
             string message = $"<p>Please click the below link to verify your email address:</p><p><a href='{verifyUrl}'>Click to verify email</a></p>";
 
             await _emailSender.SendEmailAsync(user.Email, "Please verify email", message);
-            return ServiceResponse<UserDto?>.SuccessResponse(new UserDto());
+            return ServiceResponse<UserDto?>.SuccessResponse(new UserDto()); */
         }
 
         public async Task<ServiceResponse<UserDto?>> GetCurrentUser()
@@ -124,7 +128,7 @@ namespace API.Services.AuthService
             User? user = await _userManager.Users
                 .Include(u => u.Photos)
                 .FirstOrDefaultAsync(x => x.Email == _httpContextAccessor.HttpContext!.User.FindFirstValue(ClaimTypes.Email));
-            var userDto = CreateUserObject(user!);
+            UserDto userDto = CreateUserObject(user!);
 
             if (userDto is null)
                 return new ServiceResponse<UserDto?> { Error = "User not found." };
@@ -135,7 +139,7 @@ namespace API.Services.AuthService
         public async Task<bool> VerifyFacebookToken(string accessToken)
         {
             string fbVerifyKeys = _config["Facebook:AppId"] + "|" + _config["Facebook:ApiSecret"];
-            var verifyTokenResponse = await _httpClient
+            HttpResponseMessage verifyTokenResponse = await _httpClient
                 .GetAsync($"debug_token?input_token={accessToken}&access_token={fbVerifyKeys}");
 
             return verifyTokenResponse.IsSuccessStatusCode;
@@ -159,7 +163,7 @@ namespace API.Services.AuthService
                 UserName = fbInfo.Email,
                 Photos = new List<Photo>
                 {
-                    new Photo
+                    new()
                     {
                         Id = "fb_" + fbInfo.Id,
                         Url = fbInfo.Picture!.Data!.Url,
@@ -168,7 +172,7 @@ namespace API.Services.AuthService
                 }
             };
 
-            var result = await _userManager.CreateAsync(user);
+            IdentityResult result = await _userManager.CreateAsync(user);
 
             if (!result.Succeeded)
                 return new ServiceResponse<UserDto?> { Error = "Problem creating user account" };

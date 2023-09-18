@@ -1,4 +1,5 @@
 using Application.Core;
+using Domain;
 using MediatR;
 using Persistence;
 
@@ -22,7 +23,7 @@ namespace Application.Activities
 
             public async Task<ServiceResponse<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
-                var activity = await _context.Activities.FindAsync(new object?[] { request.Id }, cancellationToken: cancellationToken);
+                Activity? activity = await _context.Activities.FindAsync(new object?[] { request.Id }, cancellationToken: cancellationToken);
                 if(activity is null) return null!;
 
                 _context.Remove(activity);

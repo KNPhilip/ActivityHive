@@ -1,5 +1,4 @@
 using Application.Comments;
-using Application.Core;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
 
@@ -17,7 +16,7 @@ namespace API.SignalR
         public async Task SendComment(Create.Command command)
         {
             var response = await _mediator.Send(command);
-            var comment = response!.Data;
+            CommentDto? comment = response!.Data;
 
             await Clients.Group(command.ActivityId.ToString())
                 .SendAsync("ReceiveComment", comment);

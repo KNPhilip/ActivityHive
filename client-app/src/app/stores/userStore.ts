@@ -34,13 +34,14 @@ export default class UserStore {
 
   register = async (creds: UserFormValues) => {
     try {
-      /*const user = await agent.Auth.register(creds);
+      const user = await agent.Auth.register(creds);
       store.commonStore.setToken(user.token);
       this.startRefreshTokenTimer(user);
       runInAction(() => (this.user = user));
-      router.navigate("/activities");*/
+      router.navigate("/activities");
+      /* Email verification is disabled in production 
       await agent.Auth.register(creds);
-      router.navigate(`/auth/registerSuccess?email=${creds.email}`);
+      router.navigate(`/auth/registerSuccess?email=${creds.email}`); */
       store.modalStore.closeModal();
     } catch (error) {
       if (isAxiosError(error) && error?.response?.status === 400) throw error;

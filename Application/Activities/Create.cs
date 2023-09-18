@@ -12,14 +12,14 @@ namespace Application.Activities
     {
         public class Command : IRequest<ServiceResponse<Unit>>
         {
-            public Activity Activity { get; set; }
+            public Activity? Activity { get; set; }
         }
 
         public class CommandValidator : AbstractValidator<Command>
         {
             public CommandValidator()
             {
-                RuleFor(a => a.Activity).SetValidator(new ActivityValidator());
+                RuleFor(a => a.Activity).SetValidator(new ActivityValidator()!);
             }
         }
 
@@ -46,11 +46,11 @@ namespace Application.Activities
                     IsHost = true
                 };
 
-                request.Activity.Attendees.Add(attendee);
+                request.Activity!.Attendees.Add(attendee);
 
                 _context.Activities.Add(request.Activity);
 
-                var result = await _context.SaveChangesAsync(cancellationToken) > 0;
+                bool result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
                 if (!result) return new ServiceResponse<Unit>() { Error = "Failed to create activity." };
 
