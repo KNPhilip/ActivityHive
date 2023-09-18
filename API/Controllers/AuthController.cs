@@ -61,7 +61,7 @@ namespace API.Controllers
             }
             else 
             {
-                ModelState.AddModelError("user", "Email or username already taken.");
+                ModelState.AddModelError("user", response.Error);
                 return ValidationProblem();
             }
         }

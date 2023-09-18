@@ -4,6 +4,8 @@ using Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+
+// using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
 
@@ -16,8 +18,10 @@ namespace API.Extensions
         {
             services.AddIdentityCore<User>(options => {
                 options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireDigit = false;
                 options.User.RequireUniqueEmail = true;
-                options.SignIn.RequireConfirmedEmail = true;
+                // Email verification is disabled in production
+                // options.SignIn.RequireConfirmedEmail = true;
             })
             .AddEntityFrameworkStores<DataContext>()
             .AddSignInManager<SignInManager<User>>()

@@ -69,11 +69,14 @@ namespace API.Services.AuthService
             if (user is null) 
                 return new ServiceResponse<UserDto?> { Error = "Invalid email" };
 
+            /* Email verification is disabled in production
             if (!user.EmailConfirmed)
                 return new ServiceResponse<UserDto?> { Error = "Email not confirmed" };
 
             var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
-            if (result.Succeeded)
+            if (result.Succeeded) */
+            bool result = await _userManager.CheckPasswordAsync(user, request.Password);
+            if (result)
             {
                 UserDto returningUser = CreateUserObject(user);
                 return ServiceResponse<UserDto?>.SuccessResponse(returningUser);
@@ -98,15 +101,15 @@ namespace API.Services.AuthService
 
             IdentityResult result = await _userManager.CreateAsync(user, request.Password);
 
-            /* Old Code
             if (result.Succeeded)
             {
                 UserDto returningUser = CreateUserObject(user);
                 ServiceResponse<UserDto>.SuccessResponse(returningUser);
             }
 
-            return new ServiceResponse<UserDto?> { Error = "Please make a stronger password." }; */
+            return new ServiceResponse<UserDto?> { Error = "Please make a stronger password." };
 
+            /* Email verification is disabled in production
             if (!result.Succeeded) return new ServiceResponse<UserDto?> { Error = "Problem registering user" };
 
             StringValues origin = _httpContextAccessor.HttpContext!.Request.Headers["origin"];
@@ -117,7 +120,7 @@ namespace API.Services.AuthService
             string message = $"<p>Please click the below link to verify your email address:</p><p><a href='{verifyUrl}'>Click to verify email</a></p>";
 
             await _emailSender.SendEmailAsync(user.Email, "Please verify email", message);
-            return ServiceResponse<UserDto?>.SuccessResponse(new UserDto());
+            return ServiceResponse<UserDto?>.SuccessResponse(new UserDto()); */
         }
 
         public async Task<ServiceResponse<UserDto?>> GetCurrentUser()
