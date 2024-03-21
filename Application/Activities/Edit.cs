@@ -22,25 +22,26 @@ namespace Application.Activities
             }
         }
 
-        public class Handler : IRequestHandler<Command, ServiceResponse<Unit>>
+        public class Handler(DataContext context, IMapper mapper) 
+            : IRequestHandler<Command, ServiceResponse<Unit>>
         {
-            private readonly DataContext _context;
-            private readonly IMapper _mapper;
-
-            public Handler(DataContext context, IMapper mapper)
-            {
-                _context = context;
-                _mapper = mapper;
-            }
+            private readonly DataContext _context = context;
+            private readonly IMapper _mapper = mapper;
 
             public async Task<ServiceResponse<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
-                Activity? activity = await _context.Activities.FindAsync(new object?[] { request.Activity!.Id }, cancellationToken);
-                if (activity is null) return null!;
+                Activity? activity = await _context.Activities
+                    .FindAsync([request.Activity!.Id], cancellationToken);
+                if (activity is null) 
+                {
+                    return null!;
+                }
                 
                 _mapper.Map(request.Activity, activity);
                 bool result = await _context.SaveChangesAsync(cancellationToken) > 0;
-                return result ? ServiceResponse<Unit>.SuccessResponse(Unit.Value) : new ServiceResponse<Unit>() { Error = "Failed to update activity." };
+                return result 
+                    ? ServiceResponse<Unit>.SuccessResponse(Unit.Value) 
+                    : new ServiceResponse<Unit>() { Error = "Failed to update activity." };
             }
         }
     }

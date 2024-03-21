@@ -4,12 +4,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Persistence
 {
-    public class DataContext : IdentityDbContext<User>
+    public class DataContext(DbContextOptions options) : IdentityDbContext<User>(options)
     {
-        public DataContext(DbContextOptions options) : base(options)
-        {
-        }
-
         public DbSet<Activity> Activities => Set<Activity>();
         public DbSet<ActivityAttendee> ActivityAttendees => Set<ActivityAttendee>();
         public DbSet<Photo> Photos => Set<Photo>();

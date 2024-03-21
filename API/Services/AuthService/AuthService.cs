@@ -37,12 +37,12 @@ namespace API.Services.AuthService
 
         public string CreateJWT(User user)
         {
-            List<Claim> claims = new() 
-            {
+            List<Claim> claims =
+            [
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim(ClaimTypes.Email, user.Email!),
                 new Claim(ClaimTypes.Name, user.UserName!)
-            };
+            ];
 
             SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(_config["TokenKey"]!));
             SigningCredentials creds = new(key, SecurityAlgorithms.HmacSha512Signature);
@@ -66,8 +66,10 @@ namespace API.Services.AuthService
                 .Include(u => u.Photos)
                 .FirstOrDefaultAsync(u => u.Email == request.Email);
 
-            if (user is null) 
+            if (user is null)
+            {
                 return new ServiceResponse<UserDto?> { Error = "Invalid email" };
+            }
 
             /* Email verification is disabled in production
             if (!user.EmailConfirmed)
@@ -86,11 +88,15 @@ namespace API.Services.AuthService
 
         public async Task<ServiceResponse<UserDto?>> Register(RegisterDto request)
         {
-            if (await _userManager.Users.AnyAsync(x => x.UserName == request.Username))
+            if (await _userManager.Users.AnyAsync(x => x.UserName == request.Username)) 
+            {
                 return new ServiceResponse<UserDto?> { Error = "This username is already taken.." };
+            }
 
-            if (await _userManager.Users.AnyAsync(x => x.Email == request.Email))
+            if (await _userManager.Users.AnyAsync(x => x.Email == request.Email)) 
+            {
                 return new ServiceResponse<UserDto?> { Error = "Email is already taken.." };
+            }
 
             User user = new() 
             {
@@ -130,10 +136,14 @@ namespace API.Services.AuthService
                 .FirstOrDefaultAsync(x => x.Email == _httpContextAccessor.HttpContext!.User.FindFirstValue(ClaimTypes.Email));
             UserDto userDto = CreateUserObject(user!);
 
-            if (userDto is null)
+            if (userDto is null) 
+            {
                 return new ServiceResponse<UserDto?> { Error = "User not found." };
-            else
+            }
+            else 
+            {
                 return ServiceResponse<UserDto?>.SuccessResponse(userDto);
+            }
         }
 
         public async Task<bool> VerifyFacebookToken(string accessToken)
@@ -153,29 +163,33 @@ namespace API.Services.AuthService
             User? user = await _userManager.Users.Include(p => p.Photos)
                 .FirstOrDefaultAsync(x => x.Email == fbInfo!.Email);
 
-            if (user != null)
+            if (user is not null) 
+            {
                 return ServiceResponse<UserDto?>.SuccessResponse(CreateUserObject(user));
+            }
 
             user = new User
             {
                 DisplayName = fbInfo!.Name,
                 Email = fbInfo.Email,
                 UserName = fbInfo.Email,
-                Photos = new List<Photo>
-                {
+                Photos =
+                [
                     new()
                     {
                         Id = "fb_" + fbInfo.Id,
                         Url = fbInfo.Picture!.Data!.Url,
                         IsMain = true
                     }
-                }
+                ]
             };
 
             IdentityResult result = await _userManager.CreateAsync(user);
 
             if (!result.Succeeded)
+            {
                 return new ServiceResponse<UserDto?> { Error = "Problem creating user account" };
+            }
 
             return ServiceResponse<UserDto?>.SuccessResponse(CreateUserObject(user));
         }
@@ -190,7 +204,10 @@ namespace API.Services.AuthService
 
             RefreshToken? oldToken = user?.RefreshTokens.SingleOrDefault(x => x.Token == refreshToken);
 
-            if (user is null || oldToken is not null && !oldToken.IsActive) return new ServiceResponse<UserDto> { Error = "No valid Refresh Tokens found." };
+            if (user is null || oldToken is not null && !oldToken.IsActive) 
+            {
+                return new ServiceResponse<UserDto> { Error = "No valid Refresh Tokens found." };
+            }
 
             UserDto returning = CreateUserObject(user);
             return ServiceResponse<UserDto>.SuccessResponse(returning);

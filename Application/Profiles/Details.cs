@@ -15,18 +15,12 @@ namespace Application.Profiles
             public string? Username { get; set; }
         }
 
-        public class Handler : IRequestHandler<Query, ServiceResponse<Profile>?>
+        public class Handler(DataContext context, IMapper mapper, 
+            IUserAccessor userAccessor) : IRequestHandler<Query, ServiceResponse<Profile>?>
         {
-            private readonly DataContext _context;
-            private readonly IMapper _mapper;
-            private readonly IUserAccessor _userAccessor;
-
-            public Handler(DataContext context, IMapper mapper, IUserAccessor userAccessor)
-            {
-                _context = context;
-                _mapper = mapper;
-                _userAccessor = userAccessor;
-            }
+            private readonly DataContext _context = context;
+            private readonly IMapper _mapper = mapper;
+            private readonly IUserAccessor _userAccessor = userAccessor;
 
             public async Task<ServiceResponse<Profile>?> Handle(Query request, CancellationToken cancellationToken)
             {
@@ -35,7 +29,10 @@ namespace Application.Profiles
                         new {currentUsername = _userAccessor.GetUsername()})
                     .FirstOrDefaultAsync(x => x.Username == request.Username, CancellationToken.None);
 
-                if (profile is null) return null;
+                if (profile is null) 
+                {
+                    return null;
+                }
 
                 return ServiceResponse<Profile>.SuccessResponse(profile!);
             }

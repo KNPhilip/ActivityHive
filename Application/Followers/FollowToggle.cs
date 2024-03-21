@@ -14,16 +14,11 @@ namespace Application.Followers
             public string? TargetUsername { get; set; }
         }
 
-        public class Handler : IRequestHandler<Command, ServiceResponse<Unit>?>
+        public class Handler(DataContext context, IUserAccessor userAccessor) 
+            : IRequestHandler<Command, ServiceResponse<Unit>?>
         {
-            private readonly DataContext _context;
-            private readonly IUserAccessor _userAccessor;
-
-            public Handler(DataContext context, IUserAccessor userAccessor)
-            {
-                _userAccessor = userAccessor;
-                _context = context;
-            }
+            private readonly DataContext _context = context;
+            private readonly IUserAccessor _userAccessor = userAccessor;
 
             public async Task<ServiceResponse<Unit>?> Handle(Command request, CancellationToken cancellationToken)
             {
@@ -33,12 +28,15 @@ namespace Application.Followers
                 User? target = await _context.Users
                     .FirstOrDefaultAsync(x => x.UserName == request.TargetUsername, CancellationToken.None);
 
-                if (target is null) return null;
+                if (target is null) 
+                {
+                    return null;
+                }
 
                 UserFollowing? following = await _context.UserFollowings
                     .FindAsync(observer!.Id, target.Id);
 
-                if (following == null)
+                if (following is null)
                 {
                     following = new UserFollowing
                     {
@@ -49,7 +47,9 @@ namespace Application.Followers
                     _context.UserFollowings.Add(following);
                 }
                 else 
+                {
                     _context.UserFollowings.Remove(following);
+                }
 
                 bool success = await _context
                     .SaveChangesAsync(CancellationToken.None) > 0;

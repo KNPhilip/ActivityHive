@@ -16,18 +16,13 @@ namespace Application.Activities
             public Guid Id { get; set; }
         }
 
-        public class Handler : IRequestHandler<Query, ServiceResponse<ActivityDto>>
+        public class Handler(DataContext context, 
+            IMapper mapper, IUserAccessor userAccessor) 
+            : IRequestHandler<Query, ServiceResponse<ActivityDto>>
         {
-            private readonly DataContext _context;
-            private readonly IMapper _mapper;
-            private readonly IUserAccessor _userAccessor;
-
-            public Handler(DataContext context, IMapper mapper, IUserAccessor userAccessor)
-            {
-                _userAccessor = userAccessor;
-                _mapper = mapper;
-                _context = context;
-            }
+            private readonly DataContext _context = context;
+            private readonly IMapper _mapper = mapper;
+            private readonly IUserAccessor _userAccessor = userAccessor;
 
             public async Task<ServiceResponse<ActivityDto>> Handle(Query request, CancellationToken cancellationToken)
             {

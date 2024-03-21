@@ -4,14 +4,9 @@ using SendGrid.Helpers.Mail;
 
 namespace Infrastructure.Email
 {
-    public class EmailSender
+    public class EmailSender(IConfiguration config)
     {
-        private readonly IConfiguration _config;
-
-        public EmailSender(IConfiguration config)
-        {
-            _config = config;
-        }
+        private readonly IConfiguration _config = config;
 
         public async Task SendEmailAsync(string userEmail, string emailSubject, string msg)
         {

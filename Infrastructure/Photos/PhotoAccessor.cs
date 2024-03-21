@@ -36,8 +36,10 @@ namespace Infrastructure.Photos
 
                 ImageUploadResult uploadResult = await _cloudinary.UploadAsync(uploadParams);
 
-                if (uploadResult.Error != null)
+                if (uploadResult.Error is not null)
+                {
                     throw new Exception(uploadResult.Error.Message);
+                }
 
                 return new PhotoUploadResult
                 {
@@ -52,7 +54,7 @@ namespace Infrastructure.Photos
         public async Task<string?> DeletePhoto(string publicId)
         {
             DeletionParams deleteParams = new(publicId);
-            var result = await _cloudinary.DestroyAsync(deleteParams);
+            DeletionResult result = await _cloudinary.DestroyAsync(deleteParams);
             return result.Result == "ok" ? result.Result : null;
         }
     }

@@ -11,6 +11,6 @@ namespace Application.Activities.Dtos
         public string Venue { get; set; } = string.Empty;
         public string HostUsername { get; set; } = string.Empty;
         public bool IsCancelled { get; set; }
-        public ICollection<AttendeeDto> Attendees { get; set; } = new List<AttendeeDto>();
+        public ICollection<AttendeeDto> Attendees { get; set; } = [];
     }
 }

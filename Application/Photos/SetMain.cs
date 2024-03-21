@@ -14,37 +14,44 @@ namespace Application.Photos
             public string? Id { get; set; }
         }
 
-        public class Handler : IRequestHandler<Command, ServiceResponse<Unit>?>
+        public class Handler(DataContext context, IUserAccessor userAccessor) 
+            : IRequestHandler<Command, ServiceResponse<Unit>?>
         {
-            private readonly IUserAccessor _userAccessor;
-            private readonly DataContext _context;
-
-            public Handler(DataContext context, IUserAccessor userAccessor)
-            {
-                _context = context;
-                _userAccessor = userAccessor;   
-            }
+            private readonly IUserAccessor _userAccessor = userAccessor;
+            private readonly DataContext _context = context;
 
             public async Task<ServiceResponse<Unit>?> Handle(Command request, CancellationToken cancellationToken)
             {
                 User? user = await _context.Users
                     .Include(u => u.Photos)
-                    .FirstOrDefaultAsync(u => u.UserName == _userAccessor.GetUsername(), CancellationToken.None);
+                    .FirstOrDefaultAsync(u => u.UserName == _userAccessor
+                        .GetUsername(), CancellationToken.None);
 
-                if (user is null) return null;
+                if (user is null) 
+                {
+                    return null;
+                } 
 
                 Photo? photo = user.Photos.FirstOrDefault(x => x.Id == request.Id);
 
-                if (photo is null) return null;
+                if (photo is null) 
+                {
+                    return null;
+                } 
 
                 Photo? currentMain = user.Photos.FirstOrDefault(x => x.IsMain);
 
-                if (currentMain is not null) currentMain.IsMain = false;
+                if (currentMain is not null) 
+                {
+                    currentMain.IsMain = false;
+                }
                 photo.IsMain = true;
 
                 bool success = await _context.SaveChangesAsync(CancellationToken.None) > 0;
-                if (success)
+                if (success) 
+                {
                     return ServiceResponse<Unit>.SuccessResponse(Unit.Value);
+                }
                 return new ServiceResponse<Unit> { Error = "Problem setting main photo" };
             }
         }

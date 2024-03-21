@@ -16,22 +16,16 @@ namespace Application.Followers
             public string? Username { get; set; }
         }
 
-        public class Handler : IRequestHandler<Query, ServiceResponse<List<Profiles.Profile>>>
+        public class Handler(DataContext context, IMapper mapper, 
+            IUserAccessor userAccessor) : IRequestHandler<Query, ServiceResponse<List<Profiles.Profile>>>
         {
-            private readonly DataContext _context;
-            private readonly IMapper _mapper;
-            private readonly IUserAccessor _userAccessor;
-
-            public Handler(DataContext context, IMapper mapper, IUserAccessor userAccessor)
-            {
-                _userAccessor = userAccessor;
-                _mapper = mapper;
-                _context = context;
-            }
+            private readonly DataContext _context = context;
+            private readonly IMapper _mapper = mapper;
+            private readonly IUserAccessor _userAccessor = userAccessor;
 
             public async Task<ServiceResponse<List<Profiles.Profile>>> Handle(Query request, CancellationToken cancellationToken)
             {
-                List<Profiles.Profile>? profiles = new List<Profiles.Profile>();
+                List<Profiles.Profile>? profiles = [];
 
                 switch (request.Predicate){
                     case "followers":

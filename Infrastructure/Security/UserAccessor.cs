@@ -4,16 +4,13 @@ using Microsoft.AspNetCore.Http;
 
 namespace Infrastructure.Security
 {
-    public class UserAccessor : IUserAccessor
+    public class UserAccessor(IHttpContextAccessor httpContextAccessor) : IUserAccessor
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
-        public UserAccessor(IHttpContextAccessor httpContextAccessor)
+        public string GetUsername() 
         {
-            _httpContextAccessor = httpContextAccessor;
+            return _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.Name)!;
         }
-
-        public string GetUsername() =>
-            _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.Name)!;
     }
 }

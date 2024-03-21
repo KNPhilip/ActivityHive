@@ -11,22 +11,20 @@ namespace Infrastructure.Security
     {
     }
 
-    public class IsHostRequirementHandler : AuthorizationHandler<IsHostRequirement>
+    public class IsHostRequirementHandler(DataContext dbContext, 
+        IHttpContextAccessor httpContextAccessor) 
+        : AuthorizationHandler<IsHostRequirement>
     {
-        private readonly DataContext _dbContext;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-
-        public IsHostRequirementHandler(DataContext dbContext, IHttpContextAccessor httpContextAccessor)
-        {
-            _dbContext = dbContext;
-            _httpContextAccessor = httpContextAccessor;
-        }
+        private readonly DataContext _dbContext = dbContext;
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
         protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, IsHostRequirement requirement)
         {
             string? userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId is null)
+            if (userId is null) 
+            {
                 return Task.CompletedTask;
+            }
 
             Guid activityId = Guid.Parse(_httpContextAccessor.HttpContext?.Request.RouteValues
                 .SingleOrDefault(x => x.Key == "id").Value?.ToString()!);
@@ -36,11 +34,15 @@ namespace Infrastructure.Security
                 .SingleOrDefaultAsync(x => x.UserId == userId && x.ActivityId == activityId)
                 .Result;
 
-            if (attendee is null)
+            if (attendee is null) 
+            {
                 return Task.CompletedTask;
+            }
 
-            if (attendee.IsHost)
+            if (attendee.IsHost) 
+            {
                 context.Succeed(requirement);
+            }
 
             return Task.CompletedTask;
         }

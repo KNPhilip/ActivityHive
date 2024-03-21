@@ -23,16 +23,11 @@ namespace Application.Activities
             }
         }
 
-        public class Handler : IRequestHandler<Command, ServiceResponse<Unit>>
+        public class Handler(DataContext context, IUserAccessor userAccessor) 
+            : IRequestHandler<Command, ServiceResponse<Unit>>
         {
-            private readonly DataContext _context;
-            private readonly IUserAccessor _userAccessor;
-
-            public Handler(DataContext context, IUserAccessor userAccessor)
-            {
-                _userAccessor = userAccessor;
-                _context = context;
-            }
+            private readonly DataContext _context = context;
+            private readonly IUserAccessor _userAccessor = userAccessor;
 
             public async Task<ServiceResponse<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
@@ -52,7 +47,10 @@ namespace Application.Activities
 
                 bool result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
-                if (!result) return new ServiceResponse<Unit>() { Error = "Failed to create activity." };
+                if (!result) 
+                {
+                    return new ServiceResponse<Unit>() { Error = "Failed to create activity." };
+                }
 
                 return ServiceResponse<Unit>.SuccessResponse(Unit.Value);
             }

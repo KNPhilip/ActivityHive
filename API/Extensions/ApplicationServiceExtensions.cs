@@ -24,9 +24,11 @@ namespace API.Extensions
 
                 // Depending on if in development or production, use either FlyIO
                 // connection string, or development connection string from env var.
-                if (env == "Development")
+                if (env == "Development") 
+                {
                     // Use connection string from file.
                     connStr = config.GetConnectionString("DefaultConnection");
+                }
                 else
                 {
                     // Use connection string provided at runtime by FlyIO.

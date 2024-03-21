@@ -25,25 +25,21 @@ namespace Application.Comments
             }
         }
 
-        public class Handler : IRequestHandler<Command, ServiceResponse<CommentDto>?>
+        public class Handler(DataContext context, IMapper mapper, 
+            IUserAccessor userAccessor) : IRequestHandler<Command, ServiceResponse<CommentDto>?>
         {
-            private readonly DataContext _context;
-            private readonly IMapper _mapper;
-            private readonly IUserAccessor _userAccessor;
-
-            public Handler(DataContext context, IMapper mapper, IUserAccessor userAccessor)
-            {
-                _context = context;
-                _mapper = mapper;
-                _userAccessor = userAccessor;
-                
-            }
+            private readonly DataContext _context = context;
+            private readonly IMapper _mapper = mapper;
+            private readonly IUserAccessor _userAccessor = userAccessor;
 
             public async Task<ServiceResponse<CommentDto>?> Handle(Command request, CancellationToken cancellationToken)
             {
                 Activity? activity = await _context.Activities.FindAsync(request.ActivityId, CancellationToken.None);
 
-                if (activity is null) return null;
+                if (activity is null) 
+                {
+                    return null;
+                } 
 
                 User? user = await _context.Users
                     .Include(p => p.Photos)
@@ -58,7 +54,7 @@ namespace Application.Comments
 
                 activity.Comments.Add(comment);
 
-                bool success = await _context.SaveChangesAsync() > 0;
+                bool success = await _context.SaveChangesAsync(CancellationToken.None) > 0;
                 return success 
                     ? ServiceResponse<CommentDto>.SuccessResponse(_mapper.Map<CommentDto>(comment))
                     : new ServiceResponse<CommentDto> { Error = "Failed to add comment" };

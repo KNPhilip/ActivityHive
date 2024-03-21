@@ -13,18 +13,12 @@ using Microsoft.Extensions.Primitives;
 namespace API.Controllers
 {
     [ApiController, Route("api/[controller]")]
-    public class AuthController : ControllerBase
+    public class AuthController(IAuthService authService, 
+        UserManager<User> userManager, EmailSender emailSender) : ControllerBase
     {
-        private readonly IAuthService _authService;
-        private readonly UserManager<User> _userManager;
-        private readonly EmailSender _emailSender;
-
-        public AuthController(IAuthService authService, UserManager<User> userManager, EmailSender emailSender)
-        {
-            _userManager = userManager;
-            _emailSender = emailSender;
-            _authService = authService;
-        }
+        private readonly IAuthService _authService = authService;
+        private readonly UserManager<User> _userManager = userManager;
+        private readonly EmailSender _emailSender = emailSender;
 
         [HttpPost("login"), AllowAnonymous]
         public async Task<ActionResult<ServiceResponse<UserDto>>> Login(LoginDto request)
@@ -32,29 +26,38 @@ namespace API.Controllers
             User? user = await _userManager.Users
                 .FirstOrDefaultAsync(u => u.Email == request.Email);
 
-            if (user is null) return Unauthorized();
+            if (user is null) 
+            {
+                return Unauthorized();
+            }
 
-            var response = await _authService.Login(request);
+            ServiceResponse<UserDto?> response = await _authService.Login(request);
 
             if (response.Success)
             {
                 await SetRefreshToken(user);
                 return Ok(response.Data);
             }
-            else return Unauthorized(response.Error ?? "You are not authorized.");
+            else 
+            {
+                return Unauthorized(response.Error ?? "You are not authorized.");
+            }
         }
 
         [HttpPost("register"), AllowAnonymous]
         public async Task<ActionResult<ServiceResponse<UserDto>>> Register(RegisterDto request)
         {
-            var response = await _authService.Register(request);
+            ServiceResponse<UserDto?> response = await _authService.Register(request);
 
             if (response.Success)
             {
                 User? user = await _userManager.Users
                     .FirstOrDefaultAsync(u => u.UserName == response.Data!.Username);
 
-                if (user is null) return Unauthorized();
+                if (user is null) 
+                {
+                    return Unauthorized();
+                }
                 
                 await SetRefreshToken(user);
                 return Ok(response.Data);
@@ -72,31 +75,39 @@ namespace API.Controllers
             User? user = await _userManager.Users
                 .FirstOrDefaultAsync(u => u.Email == User.FindFirstValue(ClaimTypes.Email));
 
-            if (user is null) return Unauthorized();
+            if (user is null) 
+            {
+                return Unauthorized();
+            }
 
-            var response = await _authService.GetCurrentUser();
+            ServiceResponse<UserDto?> response = await _authService.GetCurrentUser();
             if (response.Success)
             {
                 await SetRefreshToken(user!);
                 return Ok(response.Data);
             }
-            else return NotFound(response.Error);
+            else 
+            {
+                return NotFound(response.Error);
+            }
         }
 
         [HttpPost("fbLogin"), AllowAnonymous]
         public async Task<ActionResult<UserDto>> FacebookLogin(string accessToken)
         {
-            if (!await _authService.VerifyFacebookToken(accessToken))
+            if (!await _authService.VerifyFacebookToken(accessToken)) 
+            {
                 return Unauthorized();
+            }
 
-            var response = await _authService.FacebookLogin(accessToken);
+            ServiceResponse<UserDto?> response = await _authService.FacebookLogin(accessToken);
             return response.Success ? Ok(response.Data) : NotFound(response.Error);
         }
 
         [HttpPost("refreshToken"), Authorize]
         public async Task<ActionResult<UserDto>> RefreshToken()
         {
-            var response = await _authService.RefreshJWT();
+            ServiceResponse<UserDto> response = await _authService.RefreshJWT();
             return response.Success ? Ok(response.Data) : Unauthorized(response.Error);
         }
 
@@ -105,13 +116,19 @@ namespace API.Controllers
         {
             User? user = await _userManager.FindByEmailAsync(email);
 
-            if (user is null) return Unauthorized();
+            if (user is null) 
+            {
+                return Unauthorized();
+            }
 
             byte[] decodedTokenBytes = WebEncoders.Base64UrlDecode(token);
             string decodedToken = Encoding.UTF8.GetString(decodedTokenBytes);
             IdentityResult result = await _userManager.ConfirmEmailAsync(user, decodedToken);
 
-            if (!result.Succeeded) return BadRequest("Could not verify email address.");
+            if (!result.Succeeded) 
+            {
+                return BadRequest("Could not verify email address.");
+            }
 
             return Ok("Email confirmed, you can now login");
         }
@@ -121,9 +138,12 @@ namespace API.Controllers
         {
             User? user = await _userManager.FindByEmailAsync(email);
 
-            if (user is null) return Unauthorized();
+            if (user is null)
+            {
+                return Unauthorized();
+            }
 
-            StringValues origin = Request.Headers["origin"];
+            StringValues origin = Request.Headers.Origin;
             string token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
 
@@ -154,7 +174,7 @@ namespace API.Controllers
         private static RefreshToken GenerateRefreshToken() 
         {
             byte[] randomNumber = new byte[32];
-            using var rng = RandomNumberGenerator.Create();
+            using RandomNumberGenerator rng = RandomNumberGenerator.Create();
             rng.GetBytes(randomNumber);
             return new RefreshToken{Token = Convert.ToBase64String(randomNumber)};
         }

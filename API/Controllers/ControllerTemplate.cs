@@ -26,13 +26,19 @@ namespace API.Controllers
         {
             if (response.Success)
             {
-                if (response.Data is null) return NotFound();
+                if (response.Data is null) 
+                {
+                    return NotFound();
+                }
 
                 Response.AddPaginationHeader(response.Data.CurrentPage, response.Data.PageSize,
                     response.Data.TotalCount, response.Data.TotalPages);
                 return Ok(response.Data);
             }
-            else return BadRequest(response.Error);
+            else 
+            {
+                return BadRequest(response.Error);
+            }
         }
     }
 }

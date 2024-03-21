@@ -11,6 +11,6 @@ namespace Application.Profiles
         public bool Following { get; set; }
         public int FollowersCount { get; set; }
         public int FollowingCount { get; set; }
-        public ICollection<Photo> Photos { get; set; } = new List<Photo>();
+        public ICollection<Photo> Photos { get; set; } = [];
     }
 }

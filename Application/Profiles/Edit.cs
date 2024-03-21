@@ -24,21 +24,20 @@ namespace Application.Profiles
             }
         }
 
-        public class Handler : IRequestHandler<Command, ServiceResponse<Unit>?>
+        public class Handler(DataContext context, IUserAccessor userAccessor) 
+            : IRequestHandler<Command, ServiceResponse<Unit>?>
         {
-            private readonly DataContext _context;
-            private readonly IUserAccessor _userAccessor;
-
-            public Handler(DataContext context, IUserAccessor userAccessor)
-            {
-                _userAccessor = userAccessor;
-                _context = context;
-            }
+            private readonly DataContext _context = context;
+            private readonly IUserAccessor _userAccessor = userAccessor;
 
             public async Task<ServiceResponse<Unit>?> Handle(Command request, CancellationToken cancellationToken)
             {
-                User? user = await _context.Users.FirstOrDefaultAsync(x => x.UserName == _userAccessor.GetUsername());
-                if (user is null) return null;
+                User? user = await _context.Users.FirstOrDefaultAsync(
+                    x => x.UserName == _userAccessor.GetUsername(), CancellationToken.None);
+                if (user is null)
+                {
+                    return null;
+                } 
 
                 user.Bio = request.Bio ?? user.Bio;
                 user.DisplayName = request.DisplayName ?? user.DisplayName;

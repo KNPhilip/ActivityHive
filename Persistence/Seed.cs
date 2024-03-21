@@ -10,8 +10,8 @@ namespace Persistence
         {
             if (!userManager.Users.Any() && !context.Activities.Any())
             {
-                var users = new List<User>
-                {
+                List<User> users =
+                [
                     new()
                     {
                         DisplayName = "Bob",
@@ -30,15 +30,15 @@ namespace Persistence
                         UserName = "tom",
                         Email = "tom@test.com"
                     },
-                };
+                ];
 
-                foreach (var user in users)
+                foreach (User user in users)
                 {
                     await userManager.CreateAsync(user, "Pa$$w0rd");
                 }
 
-                var activities = new List<Activity>
-                {
+                List<Activity> activities =
+                [
                     new()
                     {
                         Title = "Past Activity 1",
@@ -47,14 +47,14 @@ namespace Persistence
                         Category = "drinks",
                         City = "London",
                         Venue = "Pub",
-                        Attendees = new List<ActivityAttendee>
-                        {
+                        Attendees =
+                        [
                             new()
                             {
                                 User = users[0],
                                 IsHost = true
                             }
-                        }
+                        ]
                     },
                     new()
                     {
@@ -86,8 +86,8 @@ namespace Persistence
                         Category = "music",
                         City = "London",
                         Venue = "Wembly Stadium",
-                        Attendees = new List<ActivityAttendee>
-                        {
+                        Attendees =
+                        [
                             new()
                             {
                                 User = users[2],
@@ -98,7 +98,7 @@ namespace Persistence
                                 User = users[1],
                                 IsHost = false
                             },
-                        }
+                        ]
                     },
                     new()
                     {
@@ -108,8 +108,8 @@ namespace Persistence
                         Category = "food",
                         City = "London",
                         Venue = "Jamies Italian",
-                        Attendees = new List<ActivityAttendee>
-                        {
+                        Attendees =
+                        [
                             new()
                             {
                                 User = users[0],
@@ -120,7 +120,7 @@ namespace Persistence
                                 User = users[2],
                                 IsHost = false
                             },
-                        }
+                        ]
                     },
                     new()
                     {
@@ -130,8 +130,8 @@ namespace Persistence
                         Category = "drinks",
                         City = "London",
                         Venue = "Pub",
-                        Attendees = new List<ActivityAttendee>
-                        {
+                        Attendees =
+                        [
                             new()
                             {
                                 User = users[1],
@@ -142,7 +142,7 @@ namespace Persistence
                                 User = users[0],
                                 IsHost = false                            
                             },
-                        }
+                        ]
                     },
                     new()
                     {
@@ -152,14 +152,14 @@ namespace Persistence
                         Category = "culture",
                         City = "London",
                         Venue = "British Museum",
-                        Attendees = new List<ActivityAttendee>
-                        {
+                        Attendees =
+                        [
                             new()
                             {
                                 User = users[1],
                                 IsHost = true                            
                             }
-                        }
+                        ]
                     },
                     new()
                     {
@@ -169,8 +169,8 @@ namespace Persistence
                         Category = "drinks",
                         City = "London",
                         Venue = "Punch and Judy",
-                        Attendees = new List<ActivityAttendee>
-                        {
+                        Attendees =
+                        [
                             new()
                             {
                                 User = users[0],
@@ -181,7 +181,7 @@ namespace Persistence
                                 User = users[1],
                                 IsHost = false                            
                             },
-                        }
+                        ]
                     },
                     new()
                     {
@@ -191,8 +191,8 @@ namespace Persistence
                         Category = "music",
                         City = "London",
                         Venue = "O2 Arena",
-                        Attendees = new List<ActivityAttendee>
-                        {
+                        Attendees =
+                        [
                             new()
                             {
                                 User = users[2],
@@ -203,7 +203,7 @@ namespace Persistence
                                 User = users[1],
                                 IsHost = false                            
                             },
-                        }
+                        ]
                     },
                     new()
                     {
@@ -213,8 +213,8 @@ namespace Persistence
                         Category = "travel",
                         City = "Berlin",
                         Venue = "All",
-                        Attendees = new List<ActivityAttendee>
-                        {
+                        Attendees =
+                        [
                             new()
                             {
                                 User = users[0],
@@ -225,7 +225,7 @@ namespace Persistence
                                 User = users[2],
                                 IsHost = false                            
                             },
-                        }
+                        ]
                     },
                     new()
                     {
@@ -235,8 +235,8 @@ namespace Persistence
                         Category = "drinks",
                         City = "London",
                         Venue = "Pub",
-                        Attendees = new List<ActivityAttendee>
-                        {
+                        Attendees =
+                        [
                             new()
                             {
                                 User = users[2],
@@ -247,9 +247,9 @@ namespace Persistence
                                 User = users[1],
                                 IsHost = false                            
                             },
-                        }
+                        ]
                     }
-                };
+                ];
 
                 await context.Activities.AddRangeAsync(activities);
                 await context.SaveChangesAsync();

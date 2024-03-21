@@ -15,20 +15,15 @@ namespace Application.Profiles
             public string? Predicate { get; set; }
         }
 
-        public class Handler : IRequestHandler<Query, ServiceResponse<List<UserActivityDto>>?>
+        public class Handler(DataContext context, IMapper mapper)
+            : IRequestHandler<Query, ServiceResponse<List<UserActivityDto>>?>
         {
-            private readonly IMapper _mapper;
-            private readonly DataContext _context;
-
-            public Handler(DataContext context, IMapper mapper)
-            {
-                _context = context;
-                _mapper = mapper;
-            }
+            private readonly IMapper _mapper = mapper;
+            private readonly DataContext _context = context;
 
             public async Task<ServiceResponse<List<UserActivityDto>>?> Handle(Query request, CancellationToken cancellationToken)
             {
-                var query = _context.ActivityAttendees
+                IQueryable<UserActivityDto> query = _context.ActivityAttendees
                     .Where(u => u.User!.UserName == request.Username)
                     .OrderBy(a => a.Activity!.Date)
                     .ProjectTo<UserActivityDto>(_mapper.ConfigurationProvider)

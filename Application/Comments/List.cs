@@ -14,16 +14,11 @@ namespace Application.Comments
             public Guid ActivityId { get; set; }
         }
 
-        public class Handler : IRequestHandler<Query, ServiceResponse<List<CommentDto>>?>
+        public class Handler(DataContext context, IMapper mapper) 
+            : IRequestHandler<Query, ServiceResponse<List<CommentDto>>?>
         {
-            private readonly IMapper _mapper;
-            private readonly DataContext _context;
-            public Handler(DataContext context, IMapper mapper)
-            {
-            _context = context;
-            _mapper = mapper;
-                
-            }
+            private readonly IMapper _mapper = mapper;
+            private readonly DataContext _context = context;
 
             public async Task<ServiceResponse<List<CommentDto>>?> Handle(Query request, CancellationToken cancellationToken)
             {
