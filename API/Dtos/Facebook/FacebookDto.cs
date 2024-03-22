@@ -1,12 +1,9 @@
-using API.Dtos.Facebook;
+namespace API.Dtos.Facebook;
 
-namespace API.Dtos
+public sealed class FacebookDto
 {
-    public class FacebookDto
-    {
-        public string Id { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty;
-        public FacebookPictureDto? Picture { get; set; }
-    }
+    public string Id { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public FacebookPictureDto? Picture { get; set; }
 }

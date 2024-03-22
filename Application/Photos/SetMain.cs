@@ -5,55 +5,55 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 
-namespace Application.Photos
+namespace Application.Photos;
+
+public sealed class SetMain
 {
-    public class SetMain
+    public sealed class Command : IRequest<ServiceResponse<Unit>?>
     {
-        public class Command : IRequest<ServiceResponse<Unit>?>
-        {
-            public string? Id { get; set; }
-        }
+        public string? Id { get; set; }
+    }
 
-        public class Handler(DataContext context, IUserAccessor userAccessor) 
-            : IRequestHandler<Command, ServiceResponse<Unit>?>
-        {
-            private readonly IUserAccessor _userAccessor = userAccessor;
-            private readonly DataContext _context = context;
+    public sealed class Handler(DataContext context, IUserAccessor userAccessor) 
+        : IRequestHandler<Command, ServiceResponse<Unit>?>
+    {
+        private readonly IUserAccessor _userAccessor = userAccessor;
+        private readonly DataContext _context = context;
 
-            public async Task<ServiceResponse<Unit>?> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<ServiceResponse<Unit>?> Handle(
+            Command request, CancellationToken cancellationToken)
+        {
+            User? user = await _context.Users
+                .Include(u => u.Photos)
+                .FirstOrDefaultAsync(u => u.UserName == _userAccessor
+                    .GetUsername(), CancellationToken.None);
+
+            if (user is null) 
             {
-                User? user = await _context.Users
-                    .Include(u => u.Photos)
-                    .FirstOrDefaultAsync(u => u.UserName == _userAccessor
-                        .GetUsername(), CancellationToken.None);
+                return null;
+            } 
 
-                if (user is null) 
-                {
-                    return null;
-                } 
+            Photo? photo = user.Photos.FirstOrDefault(x => x.Id == request.Id);
 
-                Photo? photo = user.Photos.FirstOrDefault(x => x.Id == request.Id);
+            if (photo is null) 
+            {
+                return null;
+            } 
 
-                if (photo is null) 
-                {
-                    return null;
-                } 
+            Photo? currentMain = user.Photos.FirstOrDefault(x => x.IsMain);
 
-                Photo? currentMain = user.Photos.FirstOrDefault(x => x.IsMain);
-
-                if (currentMain is not null) 
-                {
-                    currentMain.IsMain = false;
-                }
-                photo.IsMain = true;
-
-                bool success = await _context.SaveChangesAsync(CancellationToken.None) > 0;
-                if (success) 
-                {
-                    return ServiceResponse<Unit>.SuccessResponse(Unit.Value);
-                }
-                return new ServiceResponse<Unit> { Error = "Problem setting main photo" };
+            if (currentMain is not null) 
+            {
+                currentMain.IsMain = false;
             }
+            photo.IsMain = true;
+
+            bool success = await _context.SaveChangesAsync(CancellationToken.None) > 0;
+            if (success) 
+            {
+                return ServiceResponse<Unit>.SuccessResponse(Unit.Value);
+            }
+            return new ServiceResponse<Unit> { Error = "Problem setting main photo" };
         }
     }
 }

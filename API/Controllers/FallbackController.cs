@@ -1,12 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 
-namespace API.Controllers
+namespace API.Controllers;
+
+[AllowAnonymous]
+public sealed class FallbackController : Controller
 {
-    [AllowAnonymous]
-    public class FallbackController : Controller
-    {
-        public IActionResult Index() =>
-            PhysicalFile(Path.Combine(Directory.GetCurrentDirectory(),
-                "wwwroot", "index.html"), "text/HTML");
-    }
+    public IActionResult Index() =>
+        PhysicalFile(Path.Combine(Directory.GetCurrentDirectory(),
+            "wwwroot", "index.html"), "text/HTML");
 }

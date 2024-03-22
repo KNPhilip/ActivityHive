@@ -6,49 +6,49 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 
-namespace Application.Profiles
+namespace Application.Profiles;
+
+public sealed class Edit
 {
-    public class Edit
+    public sealed class Command : IRequest<ServiceResponse<Unit>?>
     {
-        public class Command : IRequest<ServiceResponse<Unit>?>
+        public string? DisplayName { get; set; }
+        public string? Bio { get; set; }
+    }
+
+    public sealed class CommandValidator : AbstractValidator<Command>
+    {
+        public CommandValidator()
         {
-            public string? DisplayName { get; set; }
-            public string? Bio { get; set; }
+            RuleFor(x => x.DisplayName).NotEmpty();
         }
+    }
 
-        public class CommandValidator : AbstractValidator<Command>
+    public sealed class Handler(DataContext context, IUserAccessor userAccessor) 
+        : IRequestHandler<Command, ServiceResponse<Unit>?>
+    {
+        private readonly DataContext _context = context;
+        private readonly IUserAccessor _userAccessor = userAccessor;
+
+        public async Task<ServiceResponse<Unit>?> Handle(
+            Command request, CancellationToken cancellationToken)
         {
-            public CommandValidator()
+            User? user = await _context.Users.FirstOrDefaultAsync(
+                x => x.UserName == _userAccessor.GetUsername(), CancellationToken.None);
+            if (user is null)
             {
-                RuleFor(x => x.DisplayName).NotEmpty();
-            }
-        }
+                return null;
+            } 
 
-        public class Handler(DataContext context, IUserAccessor userAccessor) 
-            : IRequestHandler<Command, ServiceResponse<Unit>?>
-        {
-            private readonly DataContext _context = context;
-            private readonly IUserAccessor _userAccessor = userAccessor;
+            user.Bio = request.Bio ?? user.Bio;
+            user.DisplayName = request.DisplayName ?? user.DisplayName;
 
-            public async Task<ServiceResponse<Unit>?> Handle(Command request, CancellationToken cancellationToken)
-            {
-                User? user = await _context.Users.FirstOrDefaultAsync(
-                    x => x.UserName == _userAccessor.GetUsername(), CancellationToken.None);
-                if (user is null)
-                {
-                    return null;
-                } 
+            _context.Entry(user).State = EntityState.Modified;
 
-                user.Bio = request.Bio ?? user.Bio;
-                user.DisplayName = request.DisplayName ?? user.DisplayName;
+            bool success = await _context.SaveChangesAsync(CancellationToken.None) > 0;
 
-                _context.Entry(user).State = EntityState.Modified;
-
-                bool success = await _context.SaveChangesAsync(CancellationToken.None) > 0;
-
-                return success ? ServiceResponse<Unit>.SuccessResponse(Unit.Value)
-                    : new ServiceResponse<Unit> { Error = "Problem updating profile" };
-            }
+            return success ? ServiceResponse<Unit>.SuccessResponse(Unit.Value)
+                : new ServiceResponse<Unit> { Error = "Problem updating profile" };
         }
     }
 }
