@@ -2,7 +2,17 @@ namespace Domain;
 
 public sealed class RefreshToken
 {
-    public int Id { get; set; }
+    public int id;
+
+    public int Id 
+    {
+        get => id;
+        set 
+        {
+            id = value;
+        }
+    }
+
     public User? User { get; set; }
     public string Token { get; set; } = string.Empty;
     public DateTime Expires { get; set; } = DateTime.UtcNow.AddDays(7);
