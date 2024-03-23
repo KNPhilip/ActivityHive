@@ -1,15 +1,34 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace Domain
+namespace Domain;
+
+public sealed class User : IdentityUser
 {
-    public class User : IdentityUser
+    private string displayName = string.Empty;
+    private string bio = string.Empty;
+
+    public string DisplayName 
     {
-        public string DisplayName { get; set; } = string.Empty;
-        public string Bio { get; set; } = string.Empty;
-        public ICollection<ActivityAttendee> Activities { get; set; } = new List<ActivityAttendee>();
-        public ICollection<Photo> Photos { get; set; } = new List<Photo>();
-        public ICollection<UserFollowing> Followings { get; set; } = new List<UserFollowing>();
-        public ICollection<UserFollowing> Followers { get; set; } = new List<UserFollowing>();
-        public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
+        get => displayName;
+        set
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(value));
+            displayName = value;
+        }
     }
+
+    public string Bio 
+    {
+        get => bio;
+        set
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(value));
+            bio = value;
+        }
+    }
+    public ICollection<ActivityAttendee> Activities { get; set; } = [];
+    public ICollection<Photo> Photos { get; set; } = [];
+    public ICollection<UserFollowing> Followings { get; set; } = [];
+    public ICollection<UserFollowing> Followers { get; set; } = [];
+    public ICollection<RefreshToken> RefreshTokens { get; set; } = [];
 }

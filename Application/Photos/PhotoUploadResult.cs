@@ -1,8 +1,7 @@
-namespace Application.Photos
+namespace Application.Photos;
+
+public sealed class PhotoUploadResult
 {
-    public class PhotoUploadResult
-    {
-        public string? PublicId { get; set; }
-        public string? Url { get; set; }
-    }
+    public string? PublicId { get; set; }
+    public string? Url { get; set; }
 }

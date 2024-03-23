@@ -2,32 +2,26 @@ using Microsoft.Extensions.Configuration;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 
-namespace Infrastructure.Email
+namespace Infrastructure.Email;
+
+public sealed class EmailSender(IConfiguration config)
 {
-    public class EmailSender
+    private readonly IConfiguration _config = config;
+
+    public async Task SendEmailAsync(string userEmail, string emailSubject, string msg)
     {
-        private readonly IConfiguration _config;
+        SendGridClient client = new(_config["Sendgrid:Key"]);
 
-        public EmailSender(IConfiguration config)
+        SendGridMessage message = new()
         {
-            _config = config;
-        }
+            From = new EmailAddress("knphilip@outlook.com", _config["Sendgrid:User"]),
+            Subject = emailSubject,
+            PlainTextContent = msg,
+            HtmlContent = msg
+        };
+        message.AddTo(new EmailAddress(userEmail));
+        message.SetClickTracking(false, false);
 
-        public async Task SendEmailAsync(string userEmail, string emailSubject, string msg)
-        {
-            SendGridClient client = new(_config["Sendgrid:Key"]);
-
-            SendGridMessage message = new()
-            {
-                From = new EmailAddress("knphilip@outlook.com", _config["Sendgrid:User"]),
-                Subject = emailSubject,
-                PlainTextContent = msg,
-                HtmlContent = msg
-            };
-            message.AddTo(new EmailAddress(userEmail));
-            message.SetClickTracking(false, false);
-
-            await client.SendEmailAsync(message);
-        }
+        await client.SendEmailAsync(message);
     }
 }

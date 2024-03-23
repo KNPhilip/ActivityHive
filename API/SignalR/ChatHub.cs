@@ -1,34 +1,31 @@
 using Application.Comments;
+using Application.Core;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Primitives;
 
-namespace API.SignalR
+namespace API.SignalR;
+
+public sealed class ChatHub(IMediator mediator) : Hub
 {
-    public class ChatHub : Hub
+    public IMediator _mediator = mediator;
+
+    public async Task SendComment(Create.Command command)
     {
-        public IMediator _mediator;
+        ServiceResponse<CommentDto>? response = await _mediator.Send(command);
+        CommentDto? comment = response!.Data;
 
-        public ChatHub(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
+        await Clients.Group(command.ActivityId.ToString())
+            .SendAsync("ReceiveComment", comment);
+    }
 
-        public async Task SendComment(Create.Command command)
-        {
-            var response = await _mediator.Send(command);
-            CommentDto? comment = response!.Data;
-
-            await Clients.Group(command.ActivityId.ToString())
-                .SendAsync("ReceiveComment", comment);
-        }
-
-        public override async Task OnConnectedAsync()
-        {
-            HttpContext _context = Context.GetHttpContext()!;
-            var activityId = _context!.Request.Query["activityId"];
-            await Groups.AddToGroupAsync(Context.ConnectionId, activityId!);
-            var result = await _mediator.Send(new List.Query{ActivityId = Guid.Parse(activityId!)});
-            await Clients.Caller.SendAsync("LoadComments", result!.Data);
-        }
+    public override async Task OnConnectedAsync()
+    {
+        HttpContext _context = Context.GetHttpContext()!;
+        StringValues activityId = _context!.Request.Query["activityId"];
+        await Groups.AddToGroupAsync(Context.ConnectionId, activityId!);
+        ServiceResponse<List<CommentDto>>? result = await _mediator
+            .Send(new List.Query{ActivityId = Guid.Parse(activityId!)});
+        await Clients.Caller.SendAsync("LoadComments", result!.Data);
     }
 }

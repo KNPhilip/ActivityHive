@@ -6,39 +6,36 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 
-namespace Application.Profiles
+namespace Application.Profiles;
+
+public sealed class Details
 {
-    public class Details
+    public sealed class Query : IRequest<ServiceResponse<Profile>?>
     {
-        public class Query : IRequest<ServiceResponse<Profile>?>
-        {
-            public string? Username { get; set; }
-        }
+        public string? Username { get; set; }
+    }
 
-        public class Handler : IRequestHandler<Query, ServiceResponse<Profile>?>
-        {
-            private readonly DataContext _context;
-            private readonly IMapper _mapper;
-            private readonly IUserAccessor _userAccessor;
+    public sealed class Handler(DataContext context, IMapper mapper, 
+        IUserAccessor userAccessor) : IRequestHandler<Query, ServiceResponse<Profile>?>
+    {
+        private readonly DataContext _context = context;
+        private readonly IMapper _mapper = mapper;
+        private readonly IUserAccessor _userAccessor = userAccessor;
 
-            public Handler(DataContext context, IMapper mapper, IUserAccessor userAccessor)
+        public async Task<ServiceResponse<Profile>?> Handle(
+            Query request, CancellationToken cancellationToken)
+        {
+            Profile? profile = await _context.Users
+                .ProjectTo<Profile>(_mapper.ConfigurationProvider,
+                    new {currentUsername = _userAccessor.GetUsername()})
+                .FirstOrDefaultAsync(x => x.Username == request.Username, CancellationToken.None);
+
+            if (profile is null) 
             {
-                _context = context;
-                _mapper = mapper;
-                _userAccessor = userAccessor;
+                return null;
             }
 
-            public async Task<ServiceResponse<Profile>?> Handle(Query request, CancellationToken cancellationToken)
-            {
-                Profile? profile = await _context.Users
-                    .ProjectTo<Profile>(_mapper.ConfigurationProvider,
-                        new {currentUsername = _userAccessor.GetUsername()})
-                    .FirstOrDefaultAsync(x => x.Username == request.Username, CancellationToken.None);
-
-                if (profile is null) return null;
-
-                return ServiceResponse<Profile>.SuccessResponse(profile!);
-            }
+            return ServiceResponse<Profile>.SuccessResponse(profile!);
         }
     }
 }

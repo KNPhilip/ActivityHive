@@ -1,7 +1,6 @@
-namespace API.Dtos.Facebook
+namespace API.Dtos.Facebook;
+
+public sealed class FacebookPictureDataDto
 {
-    public class FacebookPictureDataDto
-    {
-        public string Url { get; set; } = string.Empty;
-    }
+    public string Url { get; set; } = string.Empty;
 }

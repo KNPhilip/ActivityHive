@@ -1,16 +1,8 @@
-namespace Application.Core
-{
-    public class AppException
-    {
-        public AppException(int statusCode, string message, string details = null!)
-        {
-            StatusCode = statusCode;
-            Message = message;
-            Details = details;
-        }
+namespace Application.Core;
 
-        public int StatusCode { get; set; }
-        public string Message { get; set; } = string.Empty;
-        public string Details { get; set; }
-    }
+public sealed class AppException(int statusCode, string message, string details = null!)
+{
+    public int StatusCode { get; set; } = statusCode;
+    public string Message { get; set; } = message;
+    public string Details { get; set; } = details;
 }

@@ -7,37 +7,31 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 
-namespace Application.Activities
+namespace Application.Activities;
+
+public sealed class Details
 {
-    public class Details
+    public sealed class Query : IRequest<ServiceResponse<ActivityDto>> 
     {
-        public class Query : IRequest<ServiceResponse<ActivityDto>> 
+        public Guid Id { get; set; }
+    }
+
+    public sealed class Handler(DataContext context, 
+        IMapper mapper, IUserAccessor userAccessor) 
+        : IRequestHandler<Query, ServiceResponse<ActivityDto>>
+    {
+        private readonly DataContext _context = context;
+        private readonly IMapper _mapper = mapper;
+        private readonly IUserAccessor _userAccessor = userAccessor;
+
+        public async Task<ServiceResponse<ActivityDto>> Handle(Query request, CancellationToken cancellationToken)
         {
-            public Guid Id { get; set; }
-        }
+            ActivityDto? activity = await _context.Activities
+                .ProjectTo<ActivityDto>(_mapper.ConfigurationProvider, 
+                    new {currentUsername = _userAccessor.GetUsername()})
+                .FirstOrDefaultAsync(x => x.Id == request.Id, CancellationToken.None);
 
-        public class Handler : IRequestHandler<Query, ServiceResponse<ActivityDto>>
-        {
-            private readonly DataContext _context;
-            private readonly IMapper _mapper;
-            private readonly IUserAccessor _userAccessor;
-
-            public Handler(DataContext context, IMapper mapper, IUserAccessor userAccessor)
-            {
-                _userAccessor = userAccessor;
-                _mapper = mapper;
-                _context = context;
-            }
-
-            public async Task<ServiceResponse<ActivityDto>> Handle(Query request, CancellationToken cancellationToken)
-            {
-                ActivityDto? activity = await _context.Activities
-                    .ProjectTo<ActivityDto>(_mapper.ConfigurationProvider, 
-                        new {currentUsername = _userAccessor.GetUsername()})
-                    .FirstOrDefaultAsync(x => x.Id == request.Id, CancellationToken.None);
-
-                return ServiceResponse<ActivityDto>.SuccessResponse(activity!);
-            }
+            return ServiceResponse<ActivityDto>.SuccessResponse(activity!);
         }
     }
 }

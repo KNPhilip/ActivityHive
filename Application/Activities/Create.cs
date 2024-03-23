@@ -6,56 +6,53 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 
-namespace Application.Activities
+namespace Application.Activities;
+
+public sealed class Create
 {
-    public class Create
+    public sealed class Command : IRequest<ServiceResponse<Unit>>
     {
-        public class Command : IRequest<ServiceResponse<Unit>>
+        public Activity? Activity { get; set; }
+    }
+
+    public sealed class CommandValidator : AbstractValidator<Command>
+    {
+        public CommandValidator()
         {
-            public Activity? Activity { get; set; }
+            RuleFor(a => a.Activity).SetValidator(new ActivityValidator()!);
         }
+    }
 
-        public class CommandValidator : AbstractValidator<Command>
+    public sealed class Handler(DataContext context, IUserAccessor userAccessor) 
+        : IRequestHandler<Command, ServiceResponse<Unit>>
+    {
+        private readonly DataContext _context = context;
+        private readonly IUserAccessor _userAccessor = userAccessor;
+
+        public async Task<ServiceResponse<Unit>> Handle(Command request, CancellationToken cancellationToken)
         {
-            public CommandValidator()
+            User? user = await _context.Users.FirstOrDefaultAsync(u => 
+                u.UserName == _userAccessor.GetUsername(), CancellationToken.None);
+
+            ActivityAttendee attendee = new() 
             {
-                RuleFor(a => a.Activity).SetValidator(new ActivityValidator()!);
-            }
-        }
+                User = user,
+                Activity = request.Activity,
+                IsHost = true
+            };
 
-        public class Handler : IRequestHandler<Command, ServiceResponse<Unit>>
-        {
-            private readonly DataContext _context;
-            private readonly IUserAccessor _userAccessor;
+            request.Activity!.Attendees.Add(attendee);
 
-            public Handler(DataContext context, IUserAccessor userAccessor)
+            _context.Activities.Add(request.Activity);
+
+            bool result = await _context.SaveChangesAsync(cancellationToken) > 0;
+
+            if (!result) 
             {
-                _userAccessor = userAccessor;
-                _context = context;
+                return new ServiceResponse<Unit>() { Error = "Failed to create activity." };
             }
 
-            public async Task<ServiceResponse<Unit>> Handle(Command request, CancellationToken cancellationToken)
-            {
-                User? user = await _context.Users.FirstOrDefaultAsync(u => 
-                    u.UserName == _userAccessor.GetUsername(), CancellationToken.None);
-
-                ActivityAttendee attendee = new() 
-                {
-                    User = user,
-                    Activity = request.Activity,
-                    IsHost = true
-                };
-
-                request.Activity!.Attendees.Add(attendee);
-
-                _context.Activities.Add(request.Activity);
-
-                bool result = await _context.SaveChangesAsync(cancellationToken) > 0;
-
-                if (!result) return new ServiceResponse<Unit>() { Error = "Failed to create activity." };
-
-                return ServiceResponse<Unit>.SuccessResponse(Unit.Value);
-            }
+            return ServiceResponse<Unit>.SuccessResponse(Unit.Value);
         }
     }
 }

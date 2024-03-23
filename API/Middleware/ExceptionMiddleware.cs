@@ -2,45 +2,37 @@ using System.Net;
 using System.Text.Json;
 using Application.Core;
 
-namespace API.Middleware
+namespace API.Middleware;
+
+public sealed class ExceptionMiddleware(RequestDelegate next, 
+    ILogger<ExceptionMiddleware> logger, IHostEnvironment env)
 {
-    public class ExceptionMiddleware
+    private readonly RequestDelegate _next = next;
+    private readonly ILogger<ExceptionMiddleware> _logger = logger;
+    private readonly IHostEnvironment _env = env;
+
+    public async Task InvokeAsync(HttpContext context)
     {
-        private readonly RequestDelegate _next;
-        private readonly ILogger<ExceptionMiddleware> _logger;
-        private readonly IHostEnvironment _env;
-
-        public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger,
-            IHostEnvironment env)
+        try 
         {
-            _next = next;
-            _logger = logger;
-            _env = env;
+            await _next(context);
         }
-
-        public async Task InvokeAsync(HttpContext context)
+        catch(Exception ex)
         {
-            try 
-            {
-                await _next(context);
-            }
-            catch(Exception ex)
-            {
-                _logger.LogError(ex, ex.Message);
-                context.Response.ContentType = "application/json";
-                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            _logger.LogError(ex, ex.Message);
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
-                AppException response = _env.IsDevelopment()
-                    ? new(context.Response.StatusCode, ex.Message, ex.StackTrace?.ToString()!)
-                    : new(context.Response.StatusCode, "Internal Server Error");
+            AppException response = _env.IsDevelopment()
+                ? new(context.Response.StatusCode, ex.Message, ex.StackTrace?.ToString()!)
+                : new(context.Response.StatusCode, "Internal Server Error");
 
-                JsonSerializerOptions options = new()
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                };
-                string json = JsonSerializer.Serialize(response, options);
-                await context.Response.WriteAsync(json);
-            }
+            JsonSerializerOptions options = new()
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
+            string json = JsonSerializer.Serialize(response, options);
+            await context.Response.WriteAsync(json);
         }
     }
 }

@@ -3,34 +3,35 @@ using Domain;
 using MediatR;
 using Persistence;
 
-namespace Application.Activities
+namespace Application.Activities;
+
+public sealed class Delete
 {
-    public class Delete
+    public sealed class Command : IRequest<ServiceResponse<Unit>>
     {
-        public class Command : IRequest<ServiceResponse<Unit>>
-        {
-            public Guid Id { get; set; }
-        }
+        public Guid Id { get; set; }
+    }
 
-        public class Handler : IRequestHandler<Command, ServiceResponse<Unit>>
-        {
-            private readonly DataContext _context;
+    public sealed class Handler(DataContext context) 
+        : IRequestHandler<Command, ServiceResponse<Unit>>
+    {
+        private readonly DataContext _context = context;
 
-            public Handler(DataContext context)
+        public async Task<ServiceResponse<Unit>> Handle(Command request, CancellationToken cancellationToken)
+        {
+            Activity? activity = await _context.Activities
+                .FindAsync([request.Id], cancellationToken: cancellationToken);
+            if(activity is null) 
             {
-                _context = context;
+                return null!;
             }
 
-            public async Task<ServiceResponse<Unit>> Handle(Command request, CancellationToken cancellationToken)
-            {
-                Activity? activity = await _context.Activities.FindAsync(new object?[] { request.Id }, cancellationToken: cancellationToken);
-                if(activity is null) return null!;
+            _context.Remove(activity);
 
-                _context.Remove(activity);
-
-                bool result = await _context.SaveChangesAsync(cancellationToken) > 0;
-                return result ? ServiceResponse<Unit>.SuccessResponse(Unit.Value) : new ServiceResponse<Unit>() { Error = "Failed to delete the activity." };
-            }
+            bool result = await _context.SaveChangesAsync(cancellationToken) > 0;
+            return result 
+                ? ServiceResponse<Unit>.SuccessResponse(Unit.Value) 
+                : new ServiceResponse<Unit>() { Error = "Failed to delete the activity." };
         }
     }
 }
