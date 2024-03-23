@@ -23,7 +23,6 @@ jobs:
         # Using my own action to build & push to DockerHub.
         uses: knphilip/actions/dockerfile-push@main
         with:
-          context: "{{defaultContext}}"
           tags: knphilip/activityhive:latest
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
